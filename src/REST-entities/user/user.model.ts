@@ -1,11 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 
-const userSchema = new Schema({
-  name: String,
-  email: String,
-  passwordHash: String,
-  userData: { type: Object, default: {} },
-  days: [{ type: mongoose.Types.ObjectId, ref: "Day" }],
-});
+const userSchema = new Schema(
+  {
+    name: String,
+    email: String,
+    passwordHash: String,
+    userData: { type: Object, default: {} },
+    days: [{ type: mongoose.Types.ObjectId, ref: "Day" }],
+  },
+  { minimize: false }
+);
 
 export default mongoose.model("User", userSchema);

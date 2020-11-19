@@ -1,6 +1,7 @@
 import { Router } from "express";
 import Joi from "joi";
 import validate from "../helpers/function-helpers/validate";
+import { authorize } from "./../auth/auth.controller";
 import tryCatchWrapper from "../helpers/function-helpers/try-catch-wrapper";
 import { countDailyRate } from "./daily-rate.controller";
 
@@ -14,6 +15,12 @@ const getDailyRateSchema = Joi.object({
 
 const router = Router();
 
-router.post("/", validate(getDailyRateSchema), tryCatchWrapper(countDailyRate));
+router.get("/", validate(getDailyRateSchema), tryCatchWrapper(countDailyRate));
+router.post(
+  "/:userId",
+  authorize,
+  validate(getDailyRateSchema),
+  tryCatchWrapper(countDailyRate)
+);
 
 export default router;

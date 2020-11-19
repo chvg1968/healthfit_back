@@ -27,14 +27,16 @@
   },
   "homepage": "https://github.com/DanTsvirkun/slimmom-backend#readme",
   "dependencies": {
-    "mongoose": "^5.10.15",
+    "@types/uuid": "^8.3.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
-    "swagger-ui-express": "^4.1.4"
+    "mongoose": "^5.10.15",
+    "swagger-ui-express": "^4.1.4",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "typescript": "^4.0.5",

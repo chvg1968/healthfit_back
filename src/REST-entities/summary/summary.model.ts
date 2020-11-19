@@ -6,6 +6,7 @@ const summarySchema = new Schema({
   kcalConsumed: Number,
   percentsOfDailyRate: Number,
   dailyRate: Number,
+  userId: mongoose.Types.ObjectId,
 });
 
 export default mongoose.model("Summary", summarySchema);

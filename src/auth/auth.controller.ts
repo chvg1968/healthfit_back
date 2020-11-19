@@ -5,6 +5,7 @@ import { Document } from "mongoose";
 import { IMom, IJWTPayload } from "../helpers/typescript-helpers/interfaces";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
+import SummaryModel from "../REST-entities/summary/summary.model";
 
 export const register = async (req: Request, res: Response) => {
   const { email, password, username } = req.body;
@@ -66,14 +67,14 @@ export const login = async (
       expiresIn: process.env.JWT_REFRESH_EXPIRE_TIME,
     }
   );
-  req.user = user;
+  const date = new Date();
+  const today = `${date.getFullYear()}-${
+    date.getMonth() + 1
+  }-${date.getDate()}`;
+  const todaySummary = await SummaryModel.findOne({ date: today });
   return res.status(200).send({
-    user: {
-      username: (user as IMom).name,
-      email: (user as IMom).email,
-      id: (user as IMom)._id,
-      days: (user as IMom).days,
-    },
+    todaySummary,
+    user,
     accessToken,
     refreshToken,
     sid: newSession._id,

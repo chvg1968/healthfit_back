@@ -12,6 +12,7 @@ export interface IMom extends Document {
     bloodType: number;
     desiredWeight: number;
     dailyRate: number;
+    notAllowedProducts: string[];
   };
   days: MongoDBObjectId[];
 }
@@ -28,12 +29,14 @@ export interface IDaySummary extends Document {
   kcalConsumed: number;
   dailyRate: number;
   percentsOfDailyRate: number;
+  userId: MongoDBObjectId;
 }
 
 export interface IEatenProduct {
-  title: { ru: string; ua: string };
+  title: string;
   weight: number;
-  calories: number;
+  kcal: number;
+  id: string;
 }
 
 export interface ISession extends Document {
@@ -45,7 +48,10 @@ export interface IJWTPayload {
   sid: string;
 }
 
-export interface IProduct extends IEatenProduct, Document {
+export interface IProduct extends Document {
+  title: { ru: string; ua: string };
+  weight: number;
+  calories: number;
   categories: string[];
   groupBloodNotAllowed: (boolean | null)[];
 }

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import mongoose from "mongoose";
 import Joi from "joi";
 import tryCatchWrapper from "../helpers/function-helpers/try-catch-wrapper";
 import validate from "../helpers/function-helpers/validate";
@@ -22,14 +23,22 @@ const signInSchema = Joi.object({
 });
 
 const refreshTokensSchema = Joi.object({
-  sid: Joi.string().required(),
+  sid: Joi.string()
+    .custom((value, helpers) => {
+      const isValidObjectId = mongoose.Types.ObjectId.isValid(value);
+      if (!isValidObjectId) {
+        return helpers.error("Invalid session id. Must be MongoDB object id");
+      }
+      return value;
+    })
+    .required(),
 });
 
 const router = Router();
 
 router.post("/register", validate(signUpSchema), tryCatchWrapper(register));
 router.post("/login", validate(signInSchema), tryCatchWrapper(login));
-router.post(
+router.get(
   "/refresh",
   validate(refreshTokensSchema),
   tryCatchWrapper(refreshTokens)
