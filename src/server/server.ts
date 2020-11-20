@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import swaggerUi from "swagger-ui-express";
 import authRouter from "../auth/auth.router";
 import dailyRateRouter from "../daily-rate/daily-rate.router";
-import productSearchRouter from "../product-search/product-search.router";
+import productRouter from "../product-search/product-search.router";
 import dayRouter from "../REST-entities/day/day.router";
 require("dotenv").config({ path: path.join(__dirname, "../../.env") });
 const swaggerDocument = require("../../swagger.json");
@@ -61,7 +61,7 @@ export default class Server {
   private initRoutes() {
     this.app.use("/auth", authRouter);
     this.app.use("/daily-rate", dailyRateRouter);
-    this.app.use("/product-search", productSearchRouter);
+    this.app.use("/product", productRouter);
     this.app.use("/day", dayRouter);
     this.app.use(
       "/api-docs",

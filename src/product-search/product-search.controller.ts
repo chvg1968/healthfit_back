@@ -7,7 +7,8 @@ export const findProducts = async (
   next: NextFunction
 ) => {
   const { search } = req.query;
-  const foundProducts = await ProductModel.find({
+  let foundProducts;
+  foundProducts = await ProductModel.find({
     "title.ru": { $regex: search, $options: "i" },
   }).lean();
   return res.status(200).send(foundProducts);

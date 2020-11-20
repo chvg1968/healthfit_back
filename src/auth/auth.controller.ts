@@ -73,11 +73,11 @@ export const login = async (
   }-${date.getDate()}`;
   const todaySummary = await SummaryModel.findOne({ date: today });
   return res.status(200).send({
-    todaySummary,
-    user,
     accessToken,
     refreshToken,
     sid: newSession._id,
+    todaySummary,
+    user,
   });
 };
 

@@ -108,3 +108,16 @@ export const deleteProduct = async (req: Request, res: Response) => {
   await (daySummary as IDaySummary).save();
   return res.status(201).send({ newDaySummary: daySummary });
 };
+
+export const chechDailyRate = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!(req.user as IMom).userData.dailyRate) {
+    return res
+      .status(403)
+      .send({ message: "Please, count your daily rate first" });
+  }
+  next();
+};
