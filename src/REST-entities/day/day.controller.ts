@@ -109,7 +109,31 @@ export const deleteProduct = async (req: Request, res: Response) => {
   return res.status(201).send({ newDaySummary: daySummary });
 };
 
-export const chechDailyRate = (
+export const getDayInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { date } = req.body;
+  const day = await DayModel.findOne({ date: date });
+  if (!day) {
+    return res.status(404).send({ message: "Day not found" });
+  }
+  DayModel.findOne(day)
+    .populate("daySummary")
+    .exec((err, data) => {
+      if (err) {
+        next(err);
+      }
+      // @ts-ignore
+      // if ((data as IDay).daySummary.userId !== (req.user as IMom)._id) {
+      //   return res.status(404).send({ message: "Day not found" });
+      // }
+      return res.status(200).send({ day: data });
+    });
+};
+
+export const checkDailyRate = (
   req: Request,
   res: Response,
   next: NextFunction

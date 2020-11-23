@@ -4,7 +4,12 @@ import Joi from "joi";
 import { authorize } from "./../../auth/auth.controller";
 import tryCatchWrapper from "../../helpers/function-helpers/try-catch-wrapper";
 import validate from "../../helpers/function-helpers/validate";
-import { addProduct, deleteProduct, chechDailyRate } from "./day.controller";
+import {
+  addProduct,
+  deleteProduct,
+  checkDailyRate,
+  getDayInfo,
+} from "./day.controller";
 
 const addProductSchema = Joi.object({
   date: Joi.string()
@@ -42,21 +47,32 @@ const deleteProductSchema = Joi.object({
   eatenProductId: Joi.string().required(),
 });
 
+const getDayInfoScheme = Joi.object({
+  date: Joi.string().required(),
+});
+
 const router = Router();
 
 router.post(
-  "/product",
+  "/",
   authorize,
-  chechDailyRate,
+  checkDailyRate,
   validate(addProductSchema),
   tryCatchWrapper(addProduct)
 );
 router.delete(
-  "/product",
+  "/",
   authorize,
-  chechDailyRate,
+  checkDailyRate,
   validate(deleteProductSchema),
   tryCatchWrapper(deleteProduct)
+);
+router.get(
+  "/",
+  authorize,
+  checkDailyRate,
+  validate(getDayInfoScheme),
+  tryCatchWrapper(getDayInfo)
 );
 
 export default router;
