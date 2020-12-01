@@ -559,6 +559,11 @@
                 "description": "User's email",
                 "format": "email"
               },
+              "username": {
+                "type": "string",
+                "description": "User's name",
+                "example": "Emma"
+              },
               "userData": {
                 "type": "object",
                 "description": "User's daily rate data",

@@ -157,6 +157,7 @@ describe("Auth router test suite", () => {
           todaySummary: {},
           user: {
             email: "test@email.com",
+            username: "Test",
             userData: (createdUser as IMom).userData,
             id: (createdUser as IMom)._id.toString(),
           },

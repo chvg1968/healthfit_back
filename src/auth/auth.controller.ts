@@ -77,6 +77,7 @@ export const login = async (req: Request, res: Response) => {
       todaySummary: {},
       user: {
         email: (user as IMom).email,
+        username: (user as IMom).username,
         userData: (user as IMom).userData,
         id: (user as IMom)._id,
       },
@@ -97,6 +98,7 @@ export const login = async (req: Request, res: Response) => {
     },
     user: {
       email: (user as IMom).email,
+      username: (user as IMom).username,
       userData: (user as IMom).userData,
       id: (user as IMom)._id,
     },
