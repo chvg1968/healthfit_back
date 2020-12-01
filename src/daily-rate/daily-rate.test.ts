@@ -1,11 +1,12 @@
 import mongoose, { Document } from "mongoose";
 import supertest, { Response } from "supertest";
 import { Application } from "express";
-import { IMom, ISession } from "../helpers/typescript-helpers/interfaces";
+import { IMom, IProduct } from "../helpers/typescript-helpers/interfaces";
 import Server from "../server/server";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
 import SummaryModel from "../REST-entities/summary/summary.model";
+import { BloodType } from "../helpers/typescript-helpers/enums";
 
 describe("Daily-rate router test suite", () => {
   let app: Application;
@@ -41,7 +42,7 @@ describe("Daily-rate router test suite", () => {
     await mongoose.connection.close();
   });
 
-  describe("GET /daily-rate", () => {
+  describe("POST /daily-rate", () => {
     let response: Response;
 
     const validReqBody = {
@@ -49,7 +50,7 @@ describe("Daily-rate router test suite", () => {
       height: 180,
       age: 30,
       desiredWeight: 80,
-      bloodType: 2,
+      bloodType: BloodType.TWO,
     };
 
     const dailyRate = 10 * 90 + 6.25 * 180 - 5 * 30 - 161 - 10 * (90 - 80);
@@ -66,12 +67,12 @@ describe("Daily-rate router test suite", () => {
       height: 180,
       age: 30,
       desiredWeight: 80,
-      bloodType: 2,
+      bloodType: BloodType.TWO,
     };
 
     context("With validReqBody", () => {
       beforeAll(async () => {
-        response = await supertest(app).get("/daily-rate").send(validReqBody);
+        response = await supertest(app).post("/daily-rate").send(validReqBody);
       });
 
       it("Should return a 200 status code", () => {
@@ -88,41 +89,61 @@ describe("Daily-rate router test suite", () => {
       it("Should return a list of not allowed products", () => {
         expect(response.body.notAllowedProducts).toBeTruthy();
       });
+
+      it("Should return a right list of not allowed products", () => {
+        expect(
+          response.body.notAllowedProducts.find(
+            (product: IProduct) =>
+              product.groupBloodNotAllowed[validReqBody.bloodType] === true
+          )
+        ).toBeFalsy();
+      });
     });
 
-    context("With invalidReqBody", () => {
+    context("With invalidReqBody (no 'bloodType' provided)", () => {
       beforeAll(async () => {
-        response = await supertest(app).get("/daily-rate").send(invalidReqBody);
+        response = await supertest(app)
+          .post("/daily-rate")
+          .send(invalidReqBody);
       });
 
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
       });
+
+      it("Should say that 'bloodType' is required", () => {
+        expect(response.body.message).toBe('"bloodType" is required');
+      });
     });
 
-    context("With secondInvalidReqBody", () => {
+    context("With secondInvalidReqBody ('weight' is less than 0)", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .get("/daily-rate")
+          .post("/daily-rate")
           .send(secondInvalidReqBody);
       });
 
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
       });
+
+      it("Should say that 'weight' must be greater than or equal to 20", () => {
+        expect(response.body.message).toBe(
+          '"weight" must be greater than or equal to 20'
+        );
+      });
     });
   });
 
   describe("POST /daily-rate/:userId", () => {
     let response: Response;
-    let summariesToUpdate: Document[];
 
     const validReqBody = {
       weight: 90,
       height: 180,
       age: 30,
       desiredWeight: 80,
-      bloodType: 2,
+      bloodType: BloodType.TWO,
     };
 
     const dailyRate = 10 * 90 + 6.25 * 180 - 5 * 30 - 161 - 10 * (90 - 80);
@@ -139,7 +160,7 @@ describe("Daily-rate router test suite", () => {
       height: 180,
       age: 30,
       desiredWeight: 80,
-      bloodType: 2,
+      bloodType: BloodType.TWO,
     };
 
     context("With validReqBody", () => {
@@ -148,9 +169,6 @@ describe("Daily-rate router test suite", () => {
           .post(`/daily-rate/${(createdUser as IMom)._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(validReqBody);
-        summariesToUpdate = await SummaryModel.find({
-          _id: (createdUser as IMom)._id,
-        });
       });
 
       it("Should return a 201 status code", () => {
@@ -159,9 +177,9 @@ describe("Daily-rate router test suite", () => {
 
       it("Should return an expected result", () => {
         expect(response.body).toEqual({
-          id: (createdUser as IMom)._id.toString(),
           dailyRate,
-          summaries: summariesToUpdate,
+          summaries: [],
+          id: (createdUser as IMom)._id.toString(),
           notAllowedProducts: response.body.notAllowedProducts,
         });
       });
@@ -171,46 +189,47 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("With invalidReqBody", () => {
+    context("With invalidReqBody ('bloodType' not provided)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post(`/daily-rate/${(createdUser as IMom)._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(invalidReqBody);
-        summariesToUpdate = await SummaryModel.find({
-          _id: (createdUser as IMom)._id,
-        });
       });
 
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
       });
+
+      it("Should say that 'bloodType' is required", () => {
+        expect(response.body.message).toBe('"bloodType" is required');
+      });
     });
 
-    context("With secondInvalidReqBody", () => {
+    context("With secondInvalidReqBody ('weight' is less than 0)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post(`/daily-rate/${(createdUser as IMom)._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(secondInvalidReqBody);
-        summariesToUpdate = await SummaryModel.find({
-          _id: (createdUser as IMom)._id,
-        });
       });
 
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
       });
+
+      it("Should say that 'weight' must be greater than or equal to 20", () => {
+        expect(response.body.message).toBe(
+          '"weight" must be greater than or equal to 20'
+        );
+      });
     });
 
-    context("Without providing accessToken", () => {
+    context("Without providing 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post(`/daily-rate/${(createdUser as IMom)._id}`)
           .send(secondInvalidReqBody);
-        summariesToUpdate = await SummaryModel.find({
-          _id: (createdUser as IMom)._id,
-        });
       });
 
       it("Should return a 400 status code", () => {
@@ -222,15 +241,12 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("Without invalid accessToken", () => {
+    context("Without invalid 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post(`/daily-rate/${(createdUser as IMom)._id}`)
           .set("Authorization", `Bearer qwerty123`)
           .send(secondInvalidReqBody);
-        summariesToUpdate = await SummaryModel.find({
-          _id: (createdUser as IMom)._id,
-        });
       });
 
       it("Should return a 401 status code", () => {

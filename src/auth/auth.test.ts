@@ -61,9 +61,9 @@ describe("Auth router test suite", () => {
 
       it("Should return an expected result", () => {
         expect(response.body).toEqual({
-          id: (createdUser as Document)._id.toString(),
           email: validReqBody.email,
           username: validReqBody.username,
+          id: (createdUser as Document)._id.toString(),
         });
       });
 
@@ -90,7 +90,7 @@ describe("Auth router test suite", () => {
       });
     });
 
-    context("With invalidReqBody (no username provided)", () => {
+    context("With invalidReqBody (no 'username' provided)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post("/auth/register")
@@ -99,6 +99,10 @@ describe("Auth router test suite", () => {
 
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
+      });
+
+      it("Should say that 'username' is required", () => {
+        expect(response.body.message).toBe('"username" is required');
       });
     });
   });
@@ -147,18 +151,15 @@ describe("Auth router test suite", () => {
 
       it("Should return an expected result", () => {
         expect(response.body).toEqual({
-          todaySummary: null,
-          user: {
-            days: [],
-            _id: (createdUser as IMom)._id.toString(),
-            email: (createdUser as IMom).email,
-            passwordHash: (createdUser as IMom).passwordHash,
-            userData: (createdUser as IMom).userData,
-            __v: 0,
-          },
           accessToken,
           refreshToken,
           sid,
+          todaySummary: {},
+          user: {
+            email: "test@email.com",
+            userData: (createdUser as IMom).userData,
+            id: (createdUser as IMom)._id.toString(),
+          },
         });
       });
 
@@ -175,7 +176,7 @@ describe("Auth router test suite", () => {
       });
     });
 
-    context("With invalidReqBody (no password provided)", () => {
+    context("With invalidReqBody (no 'password' provided)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post("/auth/login")
@@ -184,6 +185,10 @@ describe("Auth router test suite", () => {
 
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
+      });
+
+      it("Should say that 'password' is required", () => {
+        expect(response.body.message).toBe('"password" is required');
       });
     });
 
@@ -222,7 +227,7 @@ describe("Auth router test suite", () => {
     });
   });
 
-  describe("GET /auth/refresh", () => {
+  describe("POST /auth/refresh", () => {
     let response: Response;
     let createdSession: Document | null;
     let session: Document | null;
@@ -243,10 +248,10 @@ describe("Auth router test suite", () => {
       expect(true).toBe(true);
     });
 
-    context("With invalidReqBody (no sid provided)", () => {
+    context("With invalidReqBody (invalid 'sid' type)", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .get("/auth/refresh")
+          .post("/auth/refresh")
           .set("Authorization", `Bearer ${refreshToken}`)
           .send(invalidReqBody);
       });
@@ -254,12 +259,18 @@ describe("Auth router test suite", () => {
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
       });
+
+      it("Should say that 'sid' is required", () => {
+        expect(response.body.message).toBe('"sid" must be a string');
+      });
     });
 
-    context("Without providing refreshToken", () => {
+    context("Without providing 'refreshToken'", () => {
       beforeAll(async () => {
         validReqBody.sid = sid;
-        response = await supertest(app).get("/auth/refresh").send(validReqBody);
+        response = await supertest(app)
+          .post("/auth/refresh")
+          .send(validReqBody);
       });
 
       it("Should return a 400 status code", () => {
@@ -275,7 +286,7 @@ describe("Auth router test suite", () => {
       beforeAll(async () => {
         validReqBody.sid = sid;
         response = await supertest(app)
-          .get("/auth/refresh")
+          .post("/auth/refresh")
           .set("Authorization", `Bearer qwerty123`)
           .send(validReqBody);
         session = await SessionModel.findById(sid);
@@ -302,10 +313,10 @@ describe("Auth router test suite", () => {
       });
     });
 
-    context("With secondInvalidReqBody (invalid sid)", () => {
+    context("With secondInvalidReqBody (invalid 'sid')", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .get("/auth/refresh")
+          .post("/auth/refresh")
           .set("Authorization", `Bearer ${refreshToken}`)
           .send(secondInvalidReqBody);
       });
@@ -313,13 +324,19 @@ describe("Auth router test suite", () => {
       it("Should return a 400 status code", () => {
         expect(response.status).toBe(400);
       });
+
+      it("Should say that 'sid' is invalid", () => {
+        expect(response.body.message).toBe(
+          "Invalid 'sid'. Must be MongoDB ObjectId"
+        );
+      });
     });
 
     context("With validReqBody", () => {
       beforeAll(async () => {
         validReqBody.sid = sid;
         response = await supertest(app)
-          .get("/auth/refresh")
+          .post("/auth/refresh")
           .set("Authorization", `Bearer ${refreshToken}`)
           .send(validReqBody);
         createdSession = await SessionModel.findById(response.body.sid);
@@ -367,7 +384,7 @@ describe("Auth router test suite", () => {
       });
     });
 
-    context("Without providing an accessToken", () => {
+    context("Without providing 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app).post("/auth/logout");
       });
@@ -381,7 +398,7 @@ describe("Auth router test suite", () => {
       });
     });
 
-    context("With invalid accessToken", () => {
+    context("With invalid 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post("/auth/logout")

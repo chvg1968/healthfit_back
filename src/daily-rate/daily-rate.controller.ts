@@ -1,8 +1,8 @@
-import { IProduct } from "./../helpers/typescript-helpers/interfaces";
 import { Request, Response } from "express";
 import { Document } from "mongoose";
 import ProductModel from "../REST-entities/product/product.model";
 import { IMom, IDaySummary } from "../helpers/typescript-helpers/interfaces";
+import { IProduct } from "../helpers/typescript-helpers/interfaces";
 import UserModel from "../REST-entities/user/user.model";
 import SummaryModel from "../REST-entities/summary/summary.model";
 
@@ -56,7 +56,7 @@ export const countDailyRate = async (req: Request, res: Response) => {
       notAllowedProducts,
     };
     await (user as IMom).save();
-    const summariesToUpdate = await SummaryModel.find({ userId });
+    let summariesToUpdate = await SummaryModel.find({ userId });
     if (summariesToUpdate) {
       summariesToUpdate.forEach((summary) => {
         if ((summary as IDaySummary).dailyRate > dailyRate) {
@@ -75,13 +75,15 @@ export const countDailyRate = async (req: Request, res: Response) => {
         }
         (summary as IDaySummary).save();
       });
+    } else {
+      summariesToUpdate = [];
     }
     return res.status(201).send({
-      id: (user as IMom)._id,
       dailyRate,
       summaries: summariesToUpdate,
+      id: (user as IMom)._id,
       notAllowedProducts,
     });
   }
   return res.status(200).send({ dailyRate, notAllowedProducts });
-}; 
+};

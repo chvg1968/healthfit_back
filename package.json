@@ -8,7 +8,7 @@
     "test": "jest",
     "postinstall": "tsc",
     "dev": "nodemon --files src/server/start.ts",
-    "deploy": "git add . && git commit -m Heroku && git push heroku HEAD:master"
+    "deploy": "git add . && git commit -m 'Heroku' && git push heroku HEAD:master"
   },
   "jest": {
     "preset": "ts-jest",

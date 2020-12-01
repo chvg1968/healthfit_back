@@ -1,3 +1,4 @@
+import { IDaySummary } from "./../helpers/typescript-helpers/interfaces";
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -20,22 +21,18 @@ export const register = async (req: Request, res: Response) => {
     Number(process.env.HASH_POWER)
   );
   const newMom = await UserModel.create({
+    username,
     email,
     passwordHash,
-    username,
   });
   return res.status(201).send({
-    id: newMom._id,
     email,
     username,
+    id: newMom._id,
   });
 };
 
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await UserModel.findOne({ email });
   if (!user) {
@@ -72,12 +69,37 @@ export const login = async (
     date.getMonth() + 1
   }-${date.getDate()}`;
   const todaySummary = await SummaryModel.findOne({ date: today });
+  if (!todaySummary) {
+    return res.status(200).send({
+      accessToken,
+      refreshToken,
+      sid: newSession._id,
+      todaySummary: {},
+      user: {
+        email: (user as IMom).email,
+        userData: (user as IMom).userData,
+        id: (user as IMom)._id,
+      },
+    });
+  }
   return res.status(200).send({
     accessToken,
     refreshToken,
     sid: newSession._id,
-    todaySummary,
-    user,
+    todaySummary: {
+      date: (todaySummary as IDaySummary).date,
+      kcalLeft: (todaySummary as IDaySummary).kcalLeft,
+      kcalConsumed: (todaySummary as IDaySummary).kcalConsumed,
+      dailyRate: (todaySummary as IDaySummary).dailyRate,
+      percentsOfDailyRate: (todaySummary as IDaySummary).percentsOfDailyRate,
+      userId: (todaySummary as IDaySummary).userId,
+      id: (todaySummary as IDaySummary)._id,
+    },
+    user: {
+      email: (user as IMom).email,
+      userData: (user as IMom).userData,
+      id: (user as IMom)._id,
+    },
   });
 };
 

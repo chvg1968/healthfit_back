@@ -2,7 +2,7 @@ import { Document } from "mongoose";
 import { MongoDBObjectId } from "./types";
 
 export interface IMom extends Document {
-  name: string;
+  username: string;
   email: string;
   passwordHash: string;
   userData: {

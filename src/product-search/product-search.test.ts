@@ -1,6 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 import supertest, { Response } from "supertest";
 import { Application } from "express";
+import { BloodType } from "./../helpers/typescript-helpers/enums";
+import { IMom } from "./../helpers/typescript-helpers/interfaces";
 import Server from "../server/server";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
@@ -8,7 +10,9 @@ import SessionModel from "../REST-entities/session/session.model";
 describe("Product router test suite", () => {
   let app: Application;
   let response: Response;
+  let secondResponse: Response;
   let accessToken: string;
+  let createdUser: Document | null;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -19,7 +23,7 @@ describe("Product router test suite", () => {
       useFindAndModify: false,
       useCreateIndex: true,
     });
-    await supertest(app).post("/auth/register").send({
+    secondResponse = await supertest(app).post("/auth/register").send({
       email: "test@email.com",
       password: "qwerty123",
       username: "Test",
@@ -28,6 +32,7 @@ describe("Product router test suite", () => {
       .post("/auth/login")
       .send({ email: "test@email.com", password: "qwerty123" });
     accessToken = response.body.accessToken;
+    createdUser = await UserModel.findById(secondResponse.body.id);
   });
 
   afterAll(async () => {
@@ -41,6 +46,16 @@ describe("Product router test suite", () => {
 
     context("Valid request", () => {
       beforeAll(async () => {
+        await supertest(app)
+          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .set("Authorization", `Bearer ${accessToken}`)
+          .send({
+            weight: 90,
+            height: 180,
+            age: 30,
+            desiredWeight: 80,
+            bloodType: BloodType.TWO,
+          });
         response = await supertest(app)
           .get(encodeURI("/product?search=омлет"))
           .set("Authorization", `Bearer ${accessToken}`);
@@ -103,23 +118,25 @@ describe("Product router test suite", () => {
       });
     });
 
-    context("Valid request", () => {
+    context("Invalid request (no results for 'search' query)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .get(`/product?search=${encodeURIComponent("qwerty123")}`)
           .set("Authorization", `Bearer ${accessToken}`);
       });
 
-      it("Should return a 200 status code", () => {
-        expect(response.status).toBe(200);
+      it("Should return a 400 status code", () => {
+        expect(response.status).toBe(400);
       });
 
       it("Should return an expected result", () => {
-        expect(response.body).toEqual([]);
+        expect(response.body.message).toBe(
+          "No allowed products found for this query"
+        );
       });
     });
 
-    context("Without providing an accessToken", () => {
+    context("Without providing 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app).get(
           `/product?search=${encodeURIComponent("омлет")}`
@@ -135,7 +152,7 @@ describe("Product router test suite", () => {
       });
     });
 
-    context("With invalid accessToken", () => {
+    context("With invalid 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .get(`/product?search=${encodeURIComponent("омлет")}`)
@@ -148,6 +165,22 @@ describe("Product router test suite", () => {
 
       it("Should return an unauthorized status", () => {
         expect(response.body.message).toBe("Unauthorized");
+      });
+    });
+
+    context("Without providing 'search' query", () => {
+      beforeAll(async () => {
+        response = await supertest(app)
+          .get(`/product`)
+          .set("Authorization", `Bearer ${accessToken}`);
+      });
+
+      it("Should return a 400 status code", () => {
+        expect(response.status).toBe(400);
+      });
+
+      it("Should return an unauthorized status", () => {
+        expect(response.body.message).toBe("Please, provide 'search' query");
       });
     });
   });

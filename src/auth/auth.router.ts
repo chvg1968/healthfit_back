@@ -27,7 +27,9 @@ const refreshTokensSchema = Joi.object({
     .custom((value, helpers) => {
       const isValidObjectId = mongoose.Types.ObjectId.isValid(value);
       if (!isValidObjectId) {
-        return helpers.error("Invalid session id. Must be MongoDB object id");
+        return helpers.message({
+          custom: "Invalid 'sid'. Must be MongoDB ObjectId",
+        });
       }
       return value;
     })
@@ -38,7 +40,7 @@ const router = Router();
 
 router.post("/register", validate(signUpSchema), tryCatchWrapper(register));
 router.post("/login", validate(signInSchema), tryCatchWrapper(login));
-router.get(
+router.post(
   "/refresh",
   validate(refreshTokensSchema),
   tryCatchWrapper(refreshTokens)
