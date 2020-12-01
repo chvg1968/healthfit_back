@@ -9,9 +9,7 @@
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "host": "slimmom-backend.herokuapp.com",
-  "basePath": "",
-  "schemes": ["https"],
+  "servers": [{ "url": "https://slimmom-backend.herokuapp.com" }],
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "tags": [
