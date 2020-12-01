@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "Slimmom API docs",
-    "description": "API documentation for GoIT project 'Slimmom'. Backend github repository: https://github.com/DanTsvirkun/slimmom-backend",
+    "description": "API documentation for GoIT project 'Slimmom'. [Backend github repository](https://github.com/DanTsvirkun/slimmom-backend)",
     "license": {
       "name": "MIT",
       "url": "https://opensource.org/licenses/MIT"
