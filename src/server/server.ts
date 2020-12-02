@@ -14,11 +14,10 @@ export default class Server {
   app: Application;
 
   constructor() {
-    this.app = (null as unknown) as Application;
+    this.app = express();
   }
 
   async start() {
-    this.initServer();
     this.initMiddlewares();
     await this.initDbConnection();
     this.initRoutes();
@@ -27,15 +26,10 @@ export default class Server {
   }
 
   startForTesting() {
-    this.initServer();
     this.initMiddlewares();
     this.initRoutes();
     this.initErrorHandling();
     return this.app;
-  }
-
-  private initServer() {
-    this.app = express();
   }
 
   private initMiddlewares() {
@@ -53,7 +47,7 @@ export default class Server {
       });
       console.log("Database connection is successful");
     } catch (error) {
-      console.log("Database connection failed");
+      console.log("Database connection failed", error);
       process.exit(1);
     }
   }

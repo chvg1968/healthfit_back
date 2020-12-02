@@ -52,7 +52,7 @@ describe("Auth router test suite", () => {
         response = await supertest(app)
           .post("/auth/register")
           .send(validReqBody);
-        createdUser = await UserModel.findById(response.body.id);
+        createdUser = await UserModel.findById(response.body.id).lean();
       });
 
       it("Should return a 201 status code", () => {

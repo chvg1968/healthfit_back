@@ -17,10 +17,32 @@ export interface IMom extends Document {
   days: MongoDBObjectId[];
 }
 
+export interface IMomPopulated extends Document {
+  username: string;
+  email: string;
+  passwordHash: string;
+  userData: {
+    weight: number;
+    height: number;
+    age: number;
+    bloodType: number;
+    desiredWeight: number;
+    dailyRate: number;
+    notAllowedProducts: string[];
+  };
+  days: IDay[];
+}
+
 export interface IDay extends Document {
   date: string;
   eatenProducts: IEatenProduct[];
   daySummary: MongoDBObjectId;
+}
+
+export interface IDayPopulated extends Document {
+  date: string;
+  eatenProducts: IEatenProduct[];
+  daySummary: IDaySummary;
 }
 
 export interface IDaySummary extends Document {
