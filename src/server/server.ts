@@ -3,11 +3,11 @@ import path from "path";
 import express, { Application, Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import swaggerUi from "swagger-ui-express";
+require("dotenv").config({ path: path.join(__dirname, "../../.env") });
 import authRouter from "../auth/auth.router";
 import dailyRateRouter from "../daily-rate/daily-rate.router";
 import productRouter from "../product-search/product-search.router";
 import dayRouter from "../REST-entities/day/day.router";
-require("dotenv").config({ path: path.join(__dirname, "../../.env") });
 const swaggerDocument = require("../../swagger.json");
 
 export default class Server {

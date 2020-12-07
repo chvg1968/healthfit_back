@@ -1,9 +1,12 @@
-import { IDaySummary } from "./../helpers/typescript-helpers/interfaces";
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Document } from "mongoose";
-import { IMom, IJWTPayload } from "../helpers/typescript-helpers/interfaces";
+import {
+  IMom,
+  IJWTPayload,
+  IDaySummary,
+} from "../helpers/typescript-helpers/interfaces";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
 import SummaryModel from "../REST-entities/summary/summary.model";

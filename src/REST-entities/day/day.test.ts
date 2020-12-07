@@ -597,7 +597,7 @@ describe("Day router test suite", () => {
         expect(response.status).toBe(400);
       });
 
-      it("Should say that dayId is invalid", () => {
+      it("Should say that 'dayId' is invalid", () => {
         expect(response.body.message).toBe(
           "Invalid 'dayId'. Must be MongoDB ObjectId"
         );
