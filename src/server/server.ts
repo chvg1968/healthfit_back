@@ -8,6 +8,7 @@ import authRouter from "../auth/auth.router";
 import dailyRateRouter from "../daily-rate/daily-rate.router";
 import productRouter from "../product-search/product-search.router";
 import dayRouter from "../REST-entities/day/day.router";
+import userRouter from "../REST-entities/user/user.router";
 const swaggerDocument = require("../../swagger.json");
 
 export default class Server {
@@ -57,6 +58,7 @@ export default class Server {
     this.app.use("/daily-rate", dailyRateRouter);
     this.app.use("/product", productRouter);
     this.app.use("/day", dayRouter);
+    this.app.use("/user", userRouter);
     this.app.use(
       "/api-docs",
       swaggerUi.serve,

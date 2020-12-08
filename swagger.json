@@ -28,6 +28,10 @@
     {
       "name": "Day",
       "description": "Day endpoints"
+    },
+    {
+      "name": "User",
+      "description": "User endpoints"
     }
   ],
   "paths": {
@@ -161,7 +165,7 @@
             }
           },
           "400": {
-            "description": "Invalid request body / No token provided",
+            "description": "Bad request (invalid request body) / No token provided",
             "content": {}
           },
           "401": {
@@ -425,6 +429,38 @@
           }
         }
       }
+    },
+    "/user": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user info",
+        "security": [{ "Bearer": [] }],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No token provided",
+            "content": {}
+          },
+          "401": {
+            "description": "Unauthorized (invalid access token)",
+            "content": {}
+          },
+          "404": {
+            "description": "Invalid user / Invalid session",
+            "content": {}
+          }
+        }
+      }
     }
   },
   "components": {
@@ -540,7 +576,7 @@
               },
               "id": {
                 "type": "ObjectId",
-                "description": "Day's id",
+                "description": "Day summary's id",
                 "example": "507f1f77bcf86cd799439012"
               }
             }
@@ -623,6 +659,7 @@
       },
       "RefreshTokensRequest": {
         "type": "object",
+        "required": ["sid"],
         "properties": {
           "sid": {
             "type": "string",
@@ -1126,6 +1163,177 @@
                 "type": "string",
                 "description": "User's id",
                 "example": "507f1f77bcf86cd799439012"
+              }
+            }
+          }
+        }
+      },
+      "GetUserInfo": {
+        "type": "object",
+        "description": "User's information",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "username": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Emma"
+          },
+          "id": {
+            "type": "string",
+            "description": "User's id",
+            "example": "507f1f77bcf86cd799439011"
+          },
+          "userData": {
+            "type": "object",
+            "description": "User's daily rate data",
+            "properties": {
+              "weight": {
+                "type": "number",
+                "description": "User's weight (kg)",
+                "minimum": 20,
+                "maximum": 500,
+                "example": 100
+              },
+              "height": {
+                "type": "number",
+                "description": "User's height (cm)",
+                "minimum": 100,
+                "maximum": 250,
+                "example": 170
+              },
+              "age": {
+                "type": "number",
+                "description": "User's age",
+                "minimum": 18,
+                "maximum": 100,
+                "example": 30
+              },
+              "bloodType": {
+                "type": "number",
+                "description": "User's blood type",
+                "enum": [1, 2, 3, 4]
+              },
+              "desiredWeight": {
+                "type": "number",
+                "description": "User's desired weight",
+                "minimum": 20,
+                "maximum": 500,
+                "example": 60
+              },
+              "dailyRate": {
+                "type": "string",
+                "description": "Your daily rate in kcal",
+                "example": 2000
+              },
+              "notAllowedProducts": {
+                "type": "array",
+                "description": "User's not allowed products (based on blood type)",
+                "items": {
+                  "type": "string",
+                  "description": "Not allowed product",
+                  "example": "Омлет"
+                }
+              }
+            }
+          },
+          "days": {
+            "type": "array",
+            "description": "Days array",
+            "items": {
+              "type": "object",
+              "description": "Day",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Day's id",
+                  "example": "507f1f77bcf86cd799439011"
+                },
+                "eatenProducts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "description": "Eaten product's description",
+                        "example": "Меланж яичный"
+                      },
+                      "weight": {
+                        "type": "number",
+                        "description": "Eaten product's weight",
+                        "example": 100
+                      },
+                      "kcal": {
+                        "type": "number",
+                        "description": "kcal consumed",
+                        "example": 157
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "Eaten product's id",
+                        "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+                      }
+                    }
+                  }
+                },
+                "date": {
+                  "type": "string",
+                  "description": "Day's date",
+                  "example": "2020-12-31"
+                },
+                "__v": {
+                  "type": "integer",
+                  "description": "MongoDB document service versionKey (ignore)"
+                },
+                "daySummary": {
+                  "type": "object",
+                  "description": "Day's summary",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "description": "Day's date",
+                      "example": "2020-12-31"
+                    },
+                    "kcalLeft": {
+                      "type": "number",
+                      "description": "Kcal left to consume",
+                      "example": 1000
+                    },
+                    "kcalConsumed": {
+                      "type": "number",
+                      "description": "Kcal consumed",
+                      "example": 1000
+                    },
+                    "dailyRate": {
+                      "type": "number",
+                      "description": "Daily rate in kcal",
+                      "example": 2000
+                    },
+                    "percentsOfDailyRate": {
+                      "type": "number",
+                      "description": "Percents consumed of daily rate",
+                      "example": 50
+                    },
+                    "userId": {
+                      "type": "ObjectId",
+                      "description": "User's id",
+                      "example": "507f1f77bcf86cd799439011"
+                    },
+                    "_id": {
+                      "type": "ObjectId",
+                      "description": "Day summary's id",
+                      "example": "507f1f77bcf86cd799439012"
+                    },
+                    "__v": {
+                      "type": "integer",
+                      "description": "MongoDB document service versionKey (ignore)"
+                    }
+                  }
+                }
               }
             }
           }
