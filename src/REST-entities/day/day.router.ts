@@ -72,22 +72,22 @@ const router = Router();
 
 router.post(
   "/",
-  authorize,
-  checkDailyRate,
+  tryCatchWrapper(authorize),
+  tryCatchWrapper(checkDailyRate),
   validate(addProductSchema),
   tryCatchWrapper(addProduct)
 );
 router.post(
   "/info",
-  authorize,
-  checkDailyRate,
+  tryCatchWrapper(authorize),
+  tryCatchWrapper(checkDailyRate),
   validate(getDayInfoScheme),
   tryCatchWrapper(getDayInfo)
 );
 router.delete(
   "/",
-  authorize,
-  checkDailyRate,
+  tryCatchWrapper(authorize),
+  tryCatchWrapper(checkDailyRate),
   validate(deleteProductSchema),
   tryCatchWrapper(deleteProduct)
 );

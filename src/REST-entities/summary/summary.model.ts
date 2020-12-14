@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { IDaySummary } from "../../helpers/typescript-helpers/interfaces";
 
 const summarySchema = new Schema({
   date: String,
@@ -9,4 +10,4 @@ const summarySchema = new Schema({
   userId: mongoose.Types.ObjectId,
 });
 
-export default mongoose.model("Summary", summarySchema);
+export default mongoose.model<IDaySummary>("Summary", summarySchema);

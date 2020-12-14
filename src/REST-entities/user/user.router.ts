@@ -5,6 +5,6 @@ import { getUserInfo } from "./user.controller";
 
 const router = Router();
 
-router.get("/", authorize, tryCatchWrapper(getUserInfo));
+router.get("/", tryCatchWrapper(authorize), tryCatchWrapper(getUserInfo));
 
 export default router;

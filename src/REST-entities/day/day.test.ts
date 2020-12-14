@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 import supertest, { Response } from "supertest";
 import { Application } from "express";
 import Server from "../../server/server";
@@ -7,8 +7,10 @@ import SessionModel from "../session/session.model";
 import SummaryModel from "../summary/summary.model";
 import {
   IMom,
+  IMomPopulated,
   IDaySummary,
   IDay,
+  IDayPopulated,
 } from "../../helpers/typescript-helpers/interfaces";
 import { MongoDBObjectId } from "../../helpers/typescript-helpers/types";
 import DayModel from "./day.model";
@@ -20,12 +22,12 @@ describe("Day router test suite", () => {
   let secondResponse: Response;
   let accessToken: string;
   let secondAccessToken: string;
-  let createdUser: Document | null;
-  let secondCreatedUser: Document | null;
+  let createdUser: IMom | IMomPopulated | null;
+  let secondCreatedUser: IMom | IMomPopulated | null;
   let dayId: MongoDBObjectId;
   let secondDayId: MongoDBObjectId;
   let eatenProductId: string;
-  let dayData: Document | null;
+  let dayData: IDay | null;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -60,8 +62,8 @@ describe("Day router test suite", () => {
 
   afterAll(async () => {
     await SummaryModel.deleteOne({ userId: (createdUser as IMom)._id });
-    await UserModel.deleteOne({ email: "test@email.com" });
-    await UserModel.deleteOne({ email: "testt@email.com" });
+    await UserModel.deleteOne({ email: response.body.user.email });
+    await UserModel.deleteOne({ email: secondResponse.body.user.email });
     await SessionModel.deleteOne({ _id: response.body.sid });
     await SessionModel.deleteOne({ _id: secondResponse.body.sid });
     await mongoose.connection.close();
@@ -69,9 +71,9 @@ describe("Day router test suite", () => {
 
   describe("POST /day", () => {
     let response: Response;
-    let newSummary: Document | null;
-    let daySummary: Document | null;
-    let day: Document | null;
+    let newSummary: IDaySummary | null;
+    let daySummary: IDaySummary | null;
+    let day: IDay | IDayPopulated | null;
 
     const validReqBody = {
       date: "2020-12-31",
@@ -133,7 +135,9 @@ describe("Day router test suite", () => {
           .send(validReqBody);
         newSummary = await SummaryModel.findById(response.body.newSummary.id);
         dayId = response.body.newDay.id.toString();
+        day = await DayModel.findById(dayId);
         eatenProductId = response.body.eatenProduct.id;
+        createdUser = await UserModel.findById((createdUser as IMom)._id);
       });
 
       it("Should return a 201 status code", () => {
@@ -144,7 +148,7 @@ describe("Day router test suite", () => {
         expect(response.body).toEqual({
           eatenProduct: {
             title: "Меланж яичный",
-            weight: 200,
+            weight: validReqBody.weight,
             kcal: 314,
             id: response.body.eatenProduct.id,
           },
@@ -152,17 +156,17 @@ describe("Day router test suite", () => {
             eatenProducts: [
               {
                 title: "Меланж яичный",
-                weight: 200,
+                weight: validReqBody.weight,
                 kcal: 314,
                 id: response.body.eatenProduct.id,
               },
             ],
             id: response.body.newDay.id.toString(),
-            date: "2020-12-31",
+            date: validReqBody.date,
             daySummary: response.body.newDay.daySummary,
           },
           newSummary: {
-            date: "2020-12-31",
+            date: validReqBody.date,
             kcalLeft: 1300,
             kcalConsumed: 314,
             dailyRate: 1614,
@@ -179,6 +183,14 @@ describe("Day router test suite", () => {
 
       it("Should create an id for eatenProduct", () => {
         expect(response.body.eatenProduct.id).toBeTruthy();
+      });
+
+      it("Should add a new day in DB", () => {
+        expect(day).toBeTruthy();
+      });
+
+      it("Should add a new day to user in DB", () => {
+        expect((createdUser as IMom).days[0].toString()).toBe(dayId.toString());
       });
     });
 
@@ -203,7 +215,7 @@ describe("Day router test suite", () => {
         expect(response.body).toEqual({
           eatenProduct: {
             title: "Меланж яичный",
-            weight: 200,
+            weight: validReqBody.weight,
             kcal: 314,
             id: response.body.eatenProduct.id,
           },
@@ -211,23 +223,23 @@ describe("Day router test suite", () => {
             eatenProducts: [
               {
                 title: "Меланж яичный",
-                weight: 200,
+                weight: validReqBody.weight,
                 kcal: 314,
                 id: eatenProductId,
               },
               {
                 title: "Меланж яичный",
-                weight: 200,
+                weight: validReqBody.weight,
                 kcal: 314,
                 id: response.body.eatenProduct.id,
               },
             ],
             id: response.body.day.id.toString(),
-            date: "2020-12-31",
+            date: validReqBody.date,
             daySummary: response.body.day.daySummary,
           },
           daySummary: {
-            date: "2020-12-31",
+            date: validReqBody.date,
             kcalLeft: 986,
             kcalConsumed: 628,
             dailyRate: 1614,
@@ -240,7 +252,7 @@ describe("Day router test suite", () => {
 
       it("Should update existing day summary in DB", () => {
         expect((daySummary as IDaySummary).toObject() as IDaySummary).toEqual({
-          date: "2020-12-31",
+          date: validReqBody.date,
           kcalLeft: 986,
           kcalConsumed: 628,
           dailyRate: 1614,
@@ -394,14 +406,14 @@ describe("Day router test suite", () => {
     });
 
     context("With secondValidReqBody", () => {
+      const dailyRate = 10 * 90 + 6.25 * 180 - 5 * 30 - 161 - 10 * (90 - 80);
+
       beforeAll(async () => {
         response = await supertest(app)
           .post(`/day/info`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(secondValidReqBody);
       });
-
-      const dailyRate = 10 * 90 + 6.25 * 180 - 5 * 30 - 161 - 10 * (90 - 80);
 
       it("Should return a 200 status code", () => {
         expect(response.status).toBe(200);
@@ -470,8 +482,8 @@ describe("Day router test suite", () => {
 
   describe("DELETE /day", () => {
     let response: Response;
-    let newDaySummary: Document | null;
-    let newDay: Document | null;
+    let newDaySummary: IDaySummary | null;
+    let newDay: IDay | IDayPopulated | null;
 
     const validReqBody = {
       dayId,
@@ -489,6 +501,35 @@ describe("Day router test suite", () => {
 
     afterAll(async () => {
       await DayModel.deleteOne({ _id: dayId });
+    });
+
+    context("With another account", () => {
+      beforeAll(async () => {
+        validReqBody.dayId = dayId;
+        validReqBody.eatenProductId = eatenProductId;
+        await supertest(app)
+          .post(`/daily-rate/${(secondCreatedUser as IMom)._id}`)
+          .set("Authorization", `Bearer ${secondAccessToken}`)
+          .send({
+            weight: 90,
+            height: 180,
+            age: 30,
+            desiredWeight: 85,
+            bloodType: BloodType.ONE,
+          });
+        response = await supertest(app)
+          .delete("/day")
+          .set("Authorization", `Bearer ${secondAccessToken}`)
+          .send(validReqBody);
+      });
+
+      it("Should return a 404 status code", () => {
+        expect(response.status).toBe(404);
+      });
+
+      it("Should return a 404 status code", () => {
+        expect(response.body.message).toBe("Day not found");
+      });
     });
 
     context("With validReqBody", () => {
@@ -601,33 +642,6 @@ describe("Day router test suite", () => {
         expect(response.body.message).toBe(
           "Invalid 'dayId'. Must be MongoDB ObjectId"
         );
-      });
-    });
-
-    context("With another account", () => {
-      beforeAll(async () => {
-        await supertest(app)
-          .post(`/daily-rate/${(secondCreatedUser as IMom)._id}`)
-          .set("Authorization", `Bearer ${secondAccessToken}`)
-          .send({
-            weight: 90,
-            height: 180,
-            age: 30,
-            desiredWeight: 85,
-            bloodType: BloodType.ONE,
-          });
-        response = await supertest(app)
-          .delete("/day")
-          .set("Authorization", `Bearer ${secondAccessToken}`)
-          .send(validReqBody);
-      });
-
-      it("Should return a 404 status code", () => {
-        expect(response.status).toBe(404);
-      });
-
-      it("Should return a 404 status code", () => {
-        expect(response.body.message).toBe("Day not found");
       });
     });
   });

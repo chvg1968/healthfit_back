@@ -1,7 +1,12 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 import supertest, { Response } from "supertest";
 import { Application } from "express";
-import { IMom, ISession } from "../helpers/typescript-helpers/interfaces";
+import jwt from "jsonwebtoken";
+import {
+  IMom,
+  IMomPopulated,
+  ISession,
+} from "../helpers/typescript-helpers/interfaces";
 import Server from "../server/server";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
@@ -11,7 +16,8 @@ describe("Auth router test suite", () => {
   let accessToken: string;
   let refreshToken: string;
   let sid: string;
-  let createdUser: Document | null;
+  let createdUser: IMom | IMomPopulated | null;
+  let createdSession: ISession | null;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -63,7 +69,7 @@ describe("Auth router test suite", () => {
         expect(response.body).toEqual({
           email: validReqBody.email,
           username: validReqBody.username,
-          id: (createdUser as Document)._id.toString(),
+          id: (createdUser as IMom)._id.toString(),
         });
       });
 
@@ -109,8 +115,6 @@ describe("Auth router test suite", () => {
 
   describe("POST /auth/login", () => {
     let response: Response;
-    let createdSession: Document | null;
-    let user: Document | null;
 
     const validReqBody = {
       email: "test@email.com",
@@ -139,7 +143,6 @@ describe("Auth router test suite", () => {
       beforeAll(async () => {
         response = await supertest(app).post("/auth/login").send(validReqBody);
         createdSession = await SessionModel.findById(response.body.sid);
-        user = await UserModel.findById(response.body.user._id);
         accessToken = response.body.accessToken;
         refreshToken = response.body.refreshToken;
         sid = (createdSession as ISession)._id.toString();
@@ -156,7 +159,7 @@ describe("Auth router test suite", () => {
           sid,
           todaySummary: {},
           user: {
-            email: "test@email.com",
+            email: validReqBody.email,
             username: "Test",
             userData: (createdUser as IMom).userData,
             id: (createdUser as IMom)._id.toString(),
@@ -164,12 +167,22 @@ describe("Auth router test suite", () => {
         });
       });
 
-      it("Should create an accessToken", () => {
-        expect(response.body.accessToken).toBeTruthy();
+      it("Should create valid 'accessToken'", () => {
+        expect(
+          jwt.verify(
+            response.body.accessToken,
+            process.env.JWT_SECRET as string
+          )
+        ).toBeTruthy();
       });
 
-      it("Should create a refreshToken", () => {
-        expect(response.body.refreshToken).toBeTruthy();
+      it("Should create valid 'refreshToken'", () => {
+        expect(
+          jwt.verify(
+            response.body.refreshToken,
+            process.env.JWT_SECRET as string
+          )
+        ).toBeTruthy();
       });
 
       it("Should create a new session", () => {
@@ -230,8 +243,7 @@ describe("Auth router test suite", () => {
 
   describe("POST /auth/refresh", () => {
     let response: Response;
-    let createdSession: Document | null;
-    let session: Document | null;
+    let newSession: ISession | null;
 
     const validReqBody = {
       sid,
@@ -290,7 +302,7 @@ describe("Auth router test suite", () => {
           .post("/auth/refresh")
           .set("Authorization", `Bearer qwerty123`)
           .send(validReqBody);
-        session = await SessionModel.findById(sid);
+        createdSession = await SessionModel.findById(sid);
       });
 
       afterAll(async () => {
@@ -310,7 +322,7 @@ describe("Auth router test suite", () => {
       });
 
       it("Should delete session", () => {
-        expect(session).toBeFalsy();
+        expect(createdSession).toBeFalsy();
       });
     });
 
@@ -340,7 +352,7 @@ describe("Auth router test suite", () => {
           .post("/auth/refresh")
           .set("Authorization", `Bearer ${refreshToken}`)
           .send(validReqBody);
-        createdSession = await SessionModel.findById(response.body.sid);
+        newSession = await SessionModel.findById(response.body.sid);
         accessToken = response.body.newAccessToken;
       });
 
@@ -352,16 +364,34 @@ describe("Auth router test suite", () => {
         expect(response.body).toEqual({
           newAccessToken: response.body.newAccessToken,
           newRefreshToken: response.body.newRefreshToken,
-          sid: (createdSession as ISession)._id.toString(),
+          sid: (newSession as ISession)._id.toString(),
         });
       });
 
-      it("Should create an accessToken", () => {
-        expect(response.body.newAccessToken).toBeTruthy();
+      it("Should create valid 'accessToken'", () => {
+        expect(
+          jwt.verify(
+            response.body.newAccessToken,
+            process.env.JWT_SECRET as string
+          )
+        ).toBeTruthy();
       });
 
-      it("Should create a refreshToken", () => {
-        expect(response.body.newRefreshToken).toBeTruthy();
+      it("Should create valid 'refreshToken'", () => {
+        expect(
+          jwt.verify(
+            response.body.newRefreshToken,
+            process.env.JWT_SECRET as string
+          )
+        ).toBeTruthy();
+      });
+
+      it("Should delete old session from DB", () => {
+        expect(createdSession).toBeFalsy();
+      });
+
+      it("Should create new session in DB", () => {
+        expect(newSession).toBeTruthy();
       });
     });
   });

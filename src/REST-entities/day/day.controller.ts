@@ -4,13 +4,13 @@ import UserModel from "../user/user.model";
 import ProductModel from "../product/product.model";
 import SummaryModel from "../summary/summary.model";
 import DayModel from "./day.model";
-import { IProduct } from "../../helpers/typescript-helpers/interfaces";
 import {
   IMom,
   IMomPopulated,
   IDay,
   IDayPopulated,
   IDaySummary,
+  IProduct,
 } from "../../helpers/typescript-helpers/interfaces";
 
 export const addProduct = async (
@@ -30,20 +30,19 @@ export const addProduct = async (
         next(err);
       }
       const existingDay = (data as IMomPopulated).days.find(
-        (day) => (day as IDay).date === date
+        (day) => day.date === date
       );
-      const kcalCoefficient =
-        (product as IProduct).calories / (product as IProduct).weight;
+      const kcalCoefficient = product.calories / product.weight;
       const kcalConsumed = kcalCoefficient * weight;
       const eatenProduct = {
-        title: (product as IProduct).title.ru,
+        title: product.title.ru,
         weight,
         kcal: kcalConsumed,
         id: uuid(),
       };
       if (existingDay) {
-        (existingDay as IDay).eatenProducts.push(eatenProduct);
-        await (existingDay as IDay).save();
+        existingDay.eatenProducts.push(eatenProduct);
+        await existingDay.save();
         const daySummary = await SummaryModel.findOne({
           $and: [{ date: date }, { userId: (req.user as IMom)._id }],
         });
@@ -60,10 +59,10 @@ export const addProduct = async (
         return res.status(201).send({
           eatenProduct,
           day: {
-            id: (existingDay as IDay)._id,
-            eatenProducts: (existingDay as IDay).eatenProducts,
-            date: (existingDay as IDay).date,
-            daySummary: (existingDay as IDay).daySummary,
+            id: existingDay._id,
+            eatenProducts: existingDay.eatenProducts,
+            date: existingDay.date,
+            daySummary: existingDay.daySummary,
           },
           daySummary: {
             date: (daySummary as IDaySummary).date,
@@ -86,9 +85,9 @@ export const addProduct = async (
           (kcalConsumed * 100) / (req.user as IMom).userData.dailyRate,
         userId: (req.user as IMom)._id,
       });
-      if ((newSummary as IDaySummary).kcalLeft < 0) {
-        (newSummary as IDaySummary).kcalLeft = 0;
-        (newSummary as IDaySummary).percentsOfDailyRate = 100;
+      if (newSummary.kcalLeft < 0) {
+        newSummary.kcalLeft = 0;
+        newSummary.percentsOfDailyRate = 100;
         await newSummary.save();
       }
       const newDay = await DayModel.create({
@@ -101,19 +100,19 @@ export const addProduct = async (
       return res.status(201).send({
         eatenProduct,
         newDay: {
-          id: (newDay as IDay)._id,
-          eatenProducts: (newDay as IDay).eatenProducts,
-          date: (newDay as IDay).date,
-          daySummary: (newDay as IDay).daySummary,
+          id: newDay._id,
+          eatenProducts: newDay.eatenProducts,
+          date: newDay.date,
+          daySummary: newDay.daySummary,
         },
         newSummary: {
-          date: (newSummary as IDaySummary).date,
-          kcalLeft: (newSummary as IDaySummary).kcalLeft,
-          kcalConsumed: (newSummary as IDaySummary).kcalConsumed,
-          dailyRate: (newSummary as IDaySummary).dailyRate,
-          percentsOfDailyRate: (newSummary as IDaySummary).percentsOfDailyRate,
-          userId: (newSummary as IDaySummary).userId,
-          id: (newSummary as IDaySummary)._id,
+          date: newSummary.date,
+          kcalLeft: newSummary.kcalLeft,
+          kcalConsumed: newSummary.kcalConsumed,
+          dailyRate: newSummary.dailyRate,
+          percentsOfDailyRate: newSummary.percentsOfDailyRate,
+          userId: newSummary.userId,
+          id: newSummary._id,
         },
       });
     });
@@ -167,7 +166,7 @@ export const getDayInfo = async (
         next(err);
       }
       const dayInfo = (data as IMomPopulated).days.find(
-        (day) => (day as IDay).date === date
+        (day) => day.date === date
       );
       if (!dayInfo) {
         return res.status(200).send({
@@ -177,7 +176,7 @@ export const getDayInfo = async (
           percentsOfDailyRate: 0,
         });
       }
-      DayModel.findById((dayInfo as IDay)._id)
+      DayModel.findById(dayInfo._id)
         .populate("daySummary")
         .exec((err, data) => {
           if (err) {
@@ -188,25 +187,21 @@ export const getDayInfo = async (
             eatenProducts: (data as IDayPopulated).eatenProducts,
             date: (data as IDayPopulated).date,
             daySummary: {
-              date: ((data as IDayPopulated).daySummary as IDaySummary).date,
-              kcalLeft: ((data as IDayPopulated).daySummary as IDaySummary)
-                .kcalLeft,
-              kcalConsumed: ((data as IDayPopulated).daySummary as IDaySummary)
-                .kcalConsumed,
-              dailyRate: ((data as IDayPopulated).daySummary as IDaySummary)
-                .dailyRate,
-              percentsOfDailyRate: ((data as IDayPopulated)
-                .daySummary as IDaySummary).percentsOfDailyRate,
-              userId: ((data as IDayPopulated).daySummary as IDaySummary)
-                .userId,
-              id: ((data as IDayPopulated).daySummary as IDaySummary)._id,
+              date: (data as IDayPopulated).daySummary.date,
+              kcalLeft: (data as IDayPopulated).daySummary.kcalLeft,
+              kcalConsumed: (data as IDayPopulated).daySummary.kcalConsumed,
+              dailyRate: (data as IDayPopulated).daySummary.dailyRate,
+              percentsOfDailyRate: (data as IDayPopulated).daySummary
+                .percentsOfDailyRate,
+              userId: (data as IDayPopulated).daySummary.userId,
+              id: (data as IDayPopulated).daySummary._id,
             },
           });
         });
     });
 };
 
-export const checkDailyRate = (
+export const checkDailyRate = async (
   req: Request,
   res: Response,
   next: NextFunction

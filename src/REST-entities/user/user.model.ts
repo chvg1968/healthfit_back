@@ -1,4 +1,8 @@
 import mongoose, { Schema } from "mongoose";
+import {
+  IMom,
+  IMomPopulated,
+} from "../../helpers/typescript-helpers/interfaces";
 
 const userSchema = new Schema(
   {
@@ -19,4 +23,4 @@ const userSchema = new Schema(
   { minimize: false }
 );
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model<IMom | IMomPopulated>("User", userSchema);

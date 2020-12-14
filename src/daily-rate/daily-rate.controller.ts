@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { Document } from "mongoose";
 import ProductModel from "../REST-entities/product/product.model";
 import { IMom, IDaySummary } from "../helpers/typescript-helpers/interfaces";
 import { IProduct } from "../helpers/typescript-helpers/interfaces";
@@ -11,7 +10,7 @@ export const countDailyRate = async (req: Request, res: Response) => {
   const { userId } = req.params;
   const dailyRate =
     10 * weight + 6.25 * height - 5 * age - 161 - 10 * (weight - desiredWeight);
-  let notAllowedProductsObj: Document[] = [];
+  let notAllowedProductsObj: IProduct[] = [];
   switch (bloodType) {
     case 1:
       notAllowedProductsObj = await ProductModel.find({
@@ -37,9 +36,7 @@ export const countDailyRate = async (req: Request, res: Response) => {
       break;
   }
   const notAllowedProducts = [
-    ...new Set(
-      notAllowedProductsObj.map((product) => (product as IProduct).title.ru)
-    ),
+    ...new Set(notAllowedProductsObj.map((product) => product.title.ru)),
   ];
   if (userId) {
     const user = await UserModel.findById(userId);
@@ -59,21 +56,21 @@ export const countDailyRate = async (req: Request, res: Response) => {
     let summariesToUpdate = await SummaryModel.find({ userId });
     if (summariesToUpdate) {
       summariesToUpdate.forEach((summary) => {
-        if ((summary as IDaySummary).dailyRate > dailyRate) {
-          const diff = (summary as IDaySummary).dailyRate - dailyRate;
-          (summary as IDaySummary).dailyRate = dailyRate;
-          (summary as IDaySummary).kcalLeft -= diff;
-          (summary as IDaySummary).percentsOfDailyRate =
-            ((summary as IDaySummary).kcalConsumed * 100) / dailyRate;
+        if (summary.dailyRate > dailyRate) {
+          const diff = summary.dailyRate - dailyRate;
+          summary.dailyRate = dailyRate;
+          summary.kcalLeft -= diff;
+          summary.percentsOfDailyRate =
+            (summary.kcalConsumed * 100) / dailyRate;
         }
-        if ((summary as IDaySummary).dailyRate < dailyRate) {
-          const diff = dailyRate - (summary as IDaySummary).dailyRate;
-          (summary as IDaySummary).dailyRate = dailyRate;
-          (summary as IDaySummary).kcalLeft += diff;
-          (summary as IDaySummary).percentsOfDailyRate =
-            ((summary as IDaySummary).kcalConsumed * 100) / dailyRate;
+        if (summary.dailyRate < dailyRate) {
+          const diff = dailyRate - summary.dailyRate;
+          summary.dailyRate = dailyRate;
+          summary.kcalLeft += diff;
+          summary.percentsOfDailyRate =
+            (summary.kcalConsumed * 100) / dailyRate;
         }
-        (summary as IDaySummary).save();
+        summary.save();
       });
     } else {
       summariesToUpdate = [];
@@ -81,7 +78,7 @@ export const countDailyRate = async (req: Request, res: Response) => {
     return res.status(201).send({
       dailyRate,
       summaries: summariesToUpdate,
-      id: (user as IMom)._id,
+      id: user._id,
       notAllowedProducts,
     });
   }

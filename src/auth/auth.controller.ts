@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { Document } from "mongoose";
 import {
   IMom,
   IJWTPayload,
-  IDaySummary,
+  ISession,
 } from "../helpers/typescript-helpers/interfaces";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
@@ -27,6 +26,16 @@ export const register = async (req: Request, res: Response) => {
     username,
     email,
     passwordHash,
+    userData: {
+      weight: 0,
+      height: 0,
+      age: 0,
+      bloodType: 0,
+      desiredWeight: 0,
+      dailyRate: 0,
+      notAllowedProducts: [],
+    },
+    days: [],
   });
   return res.status(201).send({
     email,
@@ -43,10 +52,7 @@ export const login = async (req: Request, res: Response) => {
       .status(403)
       .send({ message: `User with ${email} email doesn't exist` });
   }
-  const isPasswordCorrect = await bcrypt.compare(
-    password,
-    (user as IMom).passwordHash
-  );
+  const isPasswordCorrect = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordCorrect) {
     return res.status(403).send({ message: "Password is wrong" });
   }
@@ -91,19 +97,19 @@ export const login = async (req: Request, res: Response) => {
     refreshToken,
     sid: newSession._id,
     todaySummary: {
-      date: (todaySummary as IDaySummary).date,
-      kcalLeft: (todaySummary as IDaySummary).kcalLeft,
-      kcalConsumed: (todaySummary as IDaySummary).kcalConsumed,
-      dailyRate: (todaySummary as IDaySummary).dailyRate,
-      percentsOfDailyRate: (todaySummary as IDaySummary).percentsOfDailyRate,
-      userId: (todaySummary as IDaySummary).userId,
-      id: (todaySummary as IDaySummary)._id,
+      date: todaySummary.date,
+      kcalLeft: todaySummary.kcalLeft,
+      kcalConsumed: todaySummary.kcalConsumed,
+      dailyRate: todaySummary.dailyRate,
+      percentsOfDailyRate: todaySummary.percentsOfDailyRate,
+      userId: todaySummary.userId,
+      id: todaySummary._id,
     },
     user: {
-      email: (user as IMom).email,
-      username: (user as IMom).username,
-      userData: (user as IMom).userData,
-      id: (user as IMom)._id,
+      email: user.email,
+      username: user.username,
+      userData: user.userData,
+      id: user._id,
     },
   });
 };
@@ -184,7 +190,7 @@ export const refreshTokens = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   const currentSession = req.session;
-  await SessionModel.deleteOne({ _id: (currentSession as Document)._id });
+  await SessionModel.deleteOne({ _id: (currentSession as ISession)._id });
   req.user = null;
   req.session = null;
   return res.status(204).end();

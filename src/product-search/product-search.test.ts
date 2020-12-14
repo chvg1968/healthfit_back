@@ -1,8 +1,11 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 import supertest, { Response } from "supertest";
 import { Application } from "express";
 import { BloodType } from "./../helpers/typescript-helpers/enums";
-import { IMom } from "./../helpers/typescript-helpers/interfaces";
+import {
+  IMom,
+  IMomPopulated,
+} from "./../helpers/typescript-helpers/interfaces";
 import Server from "../server/server";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
@@ -12,7 +15,7 @@ describe("Product router test suite", () => {
   let response: Response;
   let secondResponse: Response;
   let accessToken: string;
-  let createdUser: Document | null;
+  let createdUser: IMom | IMomPopulated | null;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -23,20 +26,20 @@ describe("Product router test suite", () => {
       useFindAndModify: false,
       useCreateIndex: true,
     });
-    secondResponse = await supertest(app).post("/auth/register").send({
+    response = await supertest(app).post("/auth/register").send({
       email: "test@email.com",
       password: "qwerty123",
       username: "Test",
     });
-    response = await supertest(app)
+    secondResponse = await supertest(app)
       .post("/auth/login")
       .send({ email: "test@email.com", password: "qwerty123" });
-    accessToken = response.body.accessToken;
-    createdUser = await UserModel.findById(secondResponse.body.id);
+    accessToken = secondResponse.body.accessToken;
+    createdUser = await UserModel.findById(response.body.id);
   });
 
   afterAll(async () => {
-    await UserModel.deleteOne({ email: "test@email.com" });
+    await UserModel.deleteOne({ email: response.body.email });
     await SessionModel.deleteOne({ _id: response.body.sid });
     await mongoose.connection.close();
   });
@@ -60,6 +63,7 @@ describe("Product router test suite", () => {
           .get(encodeURI("/product?search=омлет"))
           .set("Authorization", `Bearer ${accessToken}`);
       });
+
       it("Should return a 200 status code", () => {
         expect(response.status).toBe(200);
       });
@@ -180,7 +184,7 @@ describe("Product router test suite", () => {
       });
 
       it("Should return an unauthorized status", () => {
-        expect(response.body.message).toBe("Please, provide 'search' query");
+        expect(response.body.message).toBe('"search" is required');
       });
     });
   });

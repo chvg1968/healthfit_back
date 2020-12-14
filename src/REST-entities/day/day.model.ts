@@ -1,4 +1,8 @@
 import mongoose, { Schema } from "mongoose";
+import {
+  IDay,
+  IDayPopulated,
+} from "../../helpers/typescript-helpers/interfaces";
 
 const daySchema = new Schema({
   date: String,
@@ -8,4 +12,4 @@ const daySchema = new Schema({
   daySummary: { type: mongoose.Types.ObjectId, ref: "Summary" },
 });
 
-export default mongoose.model("Day", daySchema);
+export default mongoose.model<IDay | IDayPopulated>("Day", daySchema);

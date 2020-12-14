@@ -1,11 +1,14 @@
-import mongoose, { Document } from "mongoose";
+import mongoose from "mongoose";
 import supertest, { Response } from "supertest";
 import { Application } from "express";
-import { IMom, IProduct } from "../helpers/typescript-helpers/interfaces";
+import {
+  IMom,
+  IMomPopulated,
+  IProduct,
+} from "../helpers/typescript-helpers/interfaces";
 import Server from "../server/server";
 import UserModel from "../REST-entities/user/user.model";
 import SessionModel from "../REST-entities/session/session.model";
-import SummaryModel from "../REST-entities/summary/summary.model";
 import { BloodType } from "../helpers/typescript-helpers/enums";
 
 describe("Daily-rate router test suite", () => {
@@ -13,7 +16,7 @@ describe("Daily-rate router test suite", () => {
   let response: Response;
   let secondResponse: Response;
   let accessToken: string;
-  let createdUser: Document | null;
+  let createdUser: IMom | IMomPopulated | null;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -37,7 +40,7 @@ describe("Daily-rate router test suite", () => {
   });
 
   afterAll(async () => {
-    await UserModel.deleteOne({ email: "test@email.com" });
+    await UserModel.deleteOne({ email: response.body.email });
     await SessionModel.deleteOne({ _id: secondResponse.body.sid });
     await mongoose.connection.close();
   });

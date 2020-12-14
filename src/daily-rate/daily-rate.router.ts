@@ -36,7 +36,7 @@ const router = Router();
 router.post("/", validate(getDailyRateSchema), tryCatchWrapper(countDailyRate));
 router.post(
   "/:userId",
-  authorize,
+  tryCatchWrapper(authorize),
   validate(userIdSchema, "params"),
   validate(getDailyRateSchema),
   tryCatchWrapper(countDailyRate)

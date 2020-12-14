@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { IProduct } from "../../helpers/typescript-helpers/interfaces";
 
 const productSchema = new Schema({
   categories: Array,
@@ -14,4 +15,4 @@ const productSchema = new Schema({
   },
 });
 
-export default mongoose.model("Product", productSchema);
+export default mongoose.model<IProduct>("Product", productSchema);
