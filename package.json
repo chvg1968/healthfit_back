@@ -7,7 +7,7 @@
     "start": "node dist/server/start.js",
     "test": "jest",
     "postinstall": "tsc",
-    "dev": "nodemon --files src/server/start.ts",
+    "dev": "nodemon --files src/server/start.js",
     "deploy": "git add . && git commit -m 'Heroku' && git push heroku HEAD:master"
   },
   "jest": {
@@ -29,13 +29,15 @@
   "homepage": "https://github.com/DanTsvirkun/slimmom-backend#readme",
   "dependencies": {
     "@types/uuid": "^8.3.0",
+    "axios": "^1.5.0",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "joi": "^17.3.0",
+    "dotenv": "^8.6.0",
+    "express": "^4.18.2",
+    "joi": "^17.10.1",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.10.15",
+    "mongoose": "^5.13.20",
     "swagger-ui-express": "^4.1.4",
     "uuid": "^8.3.1"
   },
@@ -53,7 +55,7 @@
     "@types/swagger-ui-express": "^4.1.2",
     "jest": "^26.6.3",
     "jest-plugin-context": "^2.9.0",
-    "nodemon": "^2.0.6",
+    "nodemon": "^2.0.22",
     "supertest": "^6.0.1",
     "ts-jest": "^26.4.4",
     "ts-node": "^9.0.0",

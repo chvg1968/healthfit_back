@@ -1,10 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-import {
-  IMom,
-  IMomPopulated,
-} from "../../helpers/typescript-helpers/interfaces";
+const mongoose = require("mongoose");
 
-const userSchema = new Schema(
+const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
     email: String,
@@ -23,4 +19,4 @@ const userSchema = new Schema(
   { minimize: false }
 );
 
-export default mongoose.model<IMom | IMomPopulated>("User", userSchema);
+module.exports = mongoose.model("User", userSchema);
