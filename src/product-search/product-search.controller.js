@@ -1,22 +1,27 @@
-import { Request, Response } from "express";
-import ProductModel from "../REST-entities/product/product.model";
-import { IMom, IProduct } from "../helpers/typescript-helpers/interfaces";
+const ProductModel = require("../REST-entities/product/product.model");
 
-export const findProducts = async (req: Request, res: Response) => {
+const findProducts = async (req, res) => {
   const { search } = req.query;
-  const foundProducts = await ProductModel.find({
-    "title.ru": { $regex: search, $options: "i" },
-  }).lean();
-  const filteredProducts = foundProducts.filter(
-    // @ts-ignore
-    (product) =>
-      product.groupBloodNotAllowed[(req.user as IMom).userData.bloodType] ===
-      false
-  );
-  if (!filteredProducts.length) {
-    return res
-      .status(400)
-      .send({ message: "No allowed products found for this query" });
+  try {
+    const foundProducts = await ProductModel.find({
+      "title.ru": { $regex: search, $options: "i" },
+    }).lean();
+
+    const filteredProducts = foundProducts.filter((product) =>
+      product.groupBloodNotAllowed[req.user.userData.bloodType] === false
+    );
+
+    if (!filteredProducts.length) {
+      return res
+        .status(400)
+        .send({ message: "No allowed products found for this query" });
+    }
+
+    return res.status(200).send(filteredProducts);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ message: "Internal server error" });
   }
-  return res.status(200).send(filteredProducts);
 };
+
+module.exports = findProducts;

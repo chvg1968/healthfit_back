@@ -1,7 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-import { IProduct } from "../../helpers/typescript-helpers/interfaces";
+const mongoose = require("mongoose");
 
-const productSchema = new Schema({
+const productSchema = new mongoose.Schema({
   categories: Array,
   weight: Number,
   title: { ru: String, ua: String },
@@ -15,4 +14,5 @@ const productSchema = new Schema({
   },
 });
 
-export default mongoose.model<IProduct>("Product", productSchema);
+module.exports = mongoose.model("Product", productSchema);
+

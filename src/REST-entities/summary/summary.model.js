@@ -1,7 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-import { IDaySummary } from "../../helpers/typescript-helpers/interfaces";
+const mongoose = require("mongoose");
 
-const summarySchema = new Schema({
+const summarySchema = new mongoose.Schema({
   date: String,
   kcalLeft: Number,
   kcalConsumed: Number,
@@ -10,4 +9,4 @@ const summarySchema = new Schema({
   userId: mongoose.Types.ObjectId,
 });
 
-export default mongoose.model<IDaySummary>("Summary", summarySchema);
+module.exports = mongoose.model("Summary", summarySchema);

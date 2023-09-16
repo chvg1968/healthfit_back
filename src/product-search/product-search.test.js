@@ -1,21 +1,18 @@
-import mongoose from "mongoose";
-import supertest, { Response } from "supertest";
-import { Application } from "express";
-import { BloodType } from "./../helpers/typescript-helpers/enums";
-import {
-  IMom,
-  IMomPopulated,
-} from "./../helpers/typescript-helpers/interfaces";
-import Server from "../server/server";
-import UserModel from "../REST-entities/user/user.model";
-import SessionModel from "../REST-entities/session/session.model";
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+const { Application } = require("express");
+const { BloodType } = require("../helpers/typescript-helpers/enums");
+const { IMom, IMomPopulated } = require("../helpers/typescript-helpers/interfaces");
+const Server = require("../server/server");
+const UserModel = require("../REST-entities/user/user.model");
+const SessionModel = require("../REST-entities/session/session.model");
 
 describe("Product router test suite", () => {
-  let app: Application;
-  let response: Response;
-  let secondResponse: Response;
-  let accessToken: string;
-  let createdUser: IMom | IMomPopulated | null;
+  let app;
+  let response;
+  let secondResponse;
+  let accessToken;
+  let createdUser;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -45,12 +42,12 @@ describe("Product router test suite", () => {
   });
 
   describe("GET /product?search={search}", () => {
-    let response: Response;
+    let response;
 
     context("Valid request", () => {
       beforeAll(async () => {
         await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send({
             weight: 90,

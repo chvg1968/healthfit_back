@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { authorize } from "../../auth/auth.controller";
-import tryCatchWrapper from "../../helpers/function-helpers/try-catch-wrapper";
-import { getUserInfo } from "./user.controller";
+const { Router } = require("express");
+const { authorize } = require("../../auth/auth.controller");
+const tryCatchWrapper = require("../../helpers/function-helpers/try-catch-wrapper");
+const { getUserInfo } = require("./user.controller");
 
 const router = Router();
 
 router.get("/", tryCatchWrapper(authorize), tryCatchWrapper(getUserInfo));
 
-export default router;
+module.exports = router;

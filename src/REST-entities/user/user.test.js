@@ -1,42 +1,47 @@
-import { Application } from "express";
-import mongoose, { Document } from "mongoose";
-import supertest, { Response } from "supertest";
-import { IMom } from "../../helpers/typescript-helpers/interfaces";
-import { BloodType } from "../../helpers/typescript-helpers/enums";
-import Server from "../../server/server";
-import UserModel from "./user.model";
-import SessionModel from "../session/session.model";
-import DayModel from "../day/day.model";
-import SummaryModel from "../summary/summary.model";
+const express = require("express");
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+const { BloodType } = require("../../helpers/typescript-helpers/enums");
+const Server = require("../../server/server");
+const UserModel = require("./user.model");
+const SessionModel = require("../session/session.model");
+const DayModel = require("../day/day.model");
+const SummaryModel = require("../summary/summary.model");
 
 describe("User router test suite", () => {
-  let app: Application;
-  let response: Response;
-  let createdDay: Response;
-  let accessToken: string;
-  let createdUser: Document | null;
+  let app;
+  let response;
+  let createdDay;
+  let accessToken;
+  let createdUser;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
     const url = `mongodb://127.0.0.1/user`;
+
     await mongoose.connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true,
     });
+
     await supertest(app).post("/auth/register").send({
       email: "test@email.com",
       password: "qwerty123",
       username: "Test",
     });
+
     createdUser = await UserModel.findOne({ email: "test@email.com" });
+
     response = await supertest(app)
       .post("/auth/login")
       .send({ email: "test@email.com", password: "qwerty123" });
+
     accessToken = response.body.accessToken;
+
     await supertest(app)
-      .post(`/daily-rate/${(createdUser as IMom)._id}`)
+      .post(`/daily-rate/${createdUser._id}`)
       .set("Authorization", `Bearer ${accessToken}`)
       .send({
         weight: 90,
@@ -45,6 +50,7 @@ describe("User router test suite", () => {
         desiredWeight: 80,
         bloodType: BloodType.TWO,
       });
+
     createdDay = await supertest(app)
       .post("/day")
       .set("Authorization", `Bearer ${accessToken}`)
@@ -56,15 +62,15 @@ describe("User router test suite", () => {
   });
 
   afterAll(async () => {
-    await UserModel.deleteOne({ email: (createdUser as IMom).email });
+    await UserModel.deleteOne({ email: createdUser.email });
     await SessionModel.deleteOne({ _id: response.body.sid });
     await DayModel.deleteOne({ _id: createdDay.body.newDay.id });
-    await SummaryModel.deleteOne({ userId: (createdUser as IMom)._id });
+    await SummaryModel.deleteOne({ userId: createdUser._id });
     await mongoose.connection.close();
   });
 
   describe("GET /user", () => {
-    let response: Response;
+    let response;
 
     context("Valid request", () => {
       beforeAll(async () => {
@@ -72,7 +78,7 @@ describe("User router test suite", () => {
           .get("/user")
           .set("Authorization", `Bearer ${accessToken}`);
         createdUser = await UserModel.findOne({
-          email: "test@email.com",
+          email: createdUser.email,
         }).lean();
       });
 
@@ -83,8 +89,8 @@ describe("User router test suite", () => {
       it("Should return an expected result", () => {
         expect(response.body).toEqual({
           username: "Test",
-          email: "test@email.com",
-          id: (createdUser as IMom)._id.toString(),
+          email: createdUser.email,
+          id: createdUser._id.toString(),
           userData: {
             weight: 90,
             height: 180,
@@ -92,8 +98,7 @@ describe("User router test suite", () => {
             desiredWeight: 80,
             bloodType: BloodType.TWO,
             dailyRate: 1614,
-            notAllowedProducts: (createdUser as IMom).userData
-              .notAllowedProducts,
+            notAllowedProducts: createdUser.userData.notAllowedProducts,
           },
           days: [
             {
@@ -115,7 +120,7 @@ describe("User router test suite", () => {
                 dailyRate: 1614,
                 percentsOfDailyRate: 19.454770755886,
                 _id: createdDay.body.newSummary.id,
-                userId: (createdUser as IMom)._id.toString(),
+                userId: createdUser._id.toString(),
                 __v: 0,
               },
             },

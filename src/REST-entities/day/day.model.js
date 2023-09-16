@@ -1,10 +1,6 @@
-import mongoose, { Schema } from "mongoose";
-import {
-  IDay,
-  IDayPopulated,
-} from "../../helpers/typescript-helpers/interfaces";
+const mongoose = require("mongoose");
 
-const daySchema = new Schema({
+const daySchema = new mongoose.Schema({
   date: String,
   eatenProducts: [
     { title: String, weight: Number, kcal: Number, id: String, _id: false },
@@ -12,4 +8,5 @@ const daySchema = new Schema({
   daySummary: { type: mongoose.Types.ObjectId, ref: "Summary" },
 });
 
-export default mongoose.model<IDay | IDayPopulated>("Day", daySchema);
+module.exports = mongoose.model("Day", daySchema);
+

@@ -1,3 +1,10 @@
-import Server from "./server";
+// Importa la clase Server desde el archivo server.js
+const Server = require("./server");
 
-new Server().start();
+// Crea una instancia de la clase Server
+const server = new Server();
+
+// Inicia el servidor
+server.start();
+
+

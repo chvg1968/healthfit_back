@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "type": "module",
     "start": "node dist/server/start.js",
     "test": "jest",
     "postinstall": "tsc",
-    "dev": "nodemon --files src/server/start.js",
+    "dev": "nodemon src/server/start.js",
     "deploy": "git add . && git commit -m 'Heroku' && git push heroku HEAD:master"
   },
   "jest": {

@@ -1,33 +1,33 @@
-import mongoose from "mongoose";
-import supertest, { Response } from "supertest";
-import { Application } from "express";
-import Server from "../../server/server";
-import UserModel from "../user/user.model";
-import SessionModel from "../session/session.model";
-import SummaryModel from "../summary/summary.model";
-import {
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+const express = require("express");
+const Server = require("../../server/server");
+const UserModel = require("../user/user.model");
+const SessionModel = require("../session/session.model");
+const SummaryModel = require("../summary/summary.model");
+const {
   IMom,
   IMomPopulated,
   IDaySummary,
   IDay,
   IDayPopulated,
-} from "../../helpers/typescript-helpers/interfaces";
-import { MongoDBObjectId } from "../../helpers/typescript-helpers/types";
-import DayModel from "./day.model";
-import { BloodType } from "../../helpers/typescript-helpers/enums";
+} = require("../../helpers/typescript-helpers/interfaces");
+const { MongoDBObjectId } = require("../../helpers/typescript-helpers/types");
+const DayModel = require("./day.model");
+const { BloodType } = require("../../helpers/typescript-helpers/enums");
 
 describe("Day router test suite", () => {
-  let app: Application;
-  let response: Response;
-  let secondResponse: Response;
-  let accessToken: string;
-  let secondAccessToken: string;
-  let createdUser: IMom | IMomPopulated | null;
-  let secondCreatedUser: IMom | IMomPopulated | null;
-  let dayId: MongoDBObjectId;
-  let secondDayId: MongoDBObjectId;
-  let eatenProductId: string;
-  let dayData: IDay | null;
+  let app;
+  let response;
+  let secondResponse;
+  let accessToken;
+  let secondAccessToken;
+  let createdUser;
+  let secondCreatedUser;
+  let dayId;
+  let secondDayId;
+  let eatenProductId;
+  let dayData;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -49,7 +49,9 @@ describe("Day router test suite", () => {
       username: "Test",
     });
     createdUser = await UserModel.findOne({ email: "test@email.com" });
-    secondCreatedUser = await UserModel.findOne({ email: "testt@email.com" });
+    secondCreatedUser = await UserModel.findOne({
+      email: "testt@email.com",
+    });
     response = await supertest(app)
       .post("/auth/login")
       .send({ email: "test@email.com", password: "qwerty123" });
@@ -61,7 +63,7 @@ describe("Day router test suite", () => {
   });
 
   afterAll(async () => {
-    await SummaryModel.deleteOne({ userId: (createdUser as IMom)._id });
+    await SummaryModel.deleteOne({ userId: createdUser._id });
     await UserModel.deleteOne({ email: response.body.user.email });
     await UserModel.deleteOne({ email: secondResponse.body.user.email });
     await SessionModel.deleteOne({ _id: response.body.sid });
@@ -70,10 +72,10 @@ describe("Day router test suite", () => {
   });
 
   describe("POST /day", () => {
-    let response: Response;
-    let newSummary: IDaySummary | null;
-    let daySummary: IDaySummary | null;
-    let day: IDay | IDayPopulated | null;
+    let response;
+    let newSummary;
+    let daySummary;
+    let day;
 
     const validReqBody = {
       date: "2020-12-31",
@@ -111,16 +113,14 @@ describe("Day router test suite", () => {
       });
 
       it("Should say that dailyRate wasn't counted", () => {
-        expect(response.body.message).toBe(
-          "Please, count your daily rate first"
-        );
+        expect(response.body.message).toBe("Please, count your daily rate first");
       });
     });
 
     context("With validReqBody", () => {
       beforeAll(async () => {
         await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send({
             weight: 90,
@@ -137,7 +137,7 @@ describe("Day router test suite", () => {
         dayId = response.body.newDay.id.toString();
         day = await DayModel.findById(dayId);
         eatenProductId = response.body.eatenProduct.id;
-        createdUser = await UserModel.findById((createdUser as IMom)._id);
+        createdUser = await UserModel.findById(createdUser._id);
       });
 
       it("Should return a 201 status code", () => {
@@ -171,8 +171,8 @@ describe("Day router test suite", () => {
             kcalConsumed: 314,
             dailyRate: 1614,
             percentsOfDailyRate: 19.454770755886,
-            id: (newSummary as IDaySummary)._id.toString(),
-            userId: (createdUser as IMom)._id.toString(),
+            id: newSummary._id.toString(),
+            userId: createdUser._id.toString(),
           },
         });
       });
@@ -190,7 +190,7 @@ describe("Day router test suite", () => {
       });
 
       it("Should add a new day to user in DB", () => {
-        expect((createdUser as IMom).days[0].toString()).toBe(dayId.toString());
+        expect(createdUser.days[0].toString()).toBe(dayId.toString());
       });
     });
 
@@ -204,7 +204,7 @@ describe("Day router test suite", () => {
         secondDayId = response.body.day.id;
         day = await DayModel.findById(secondDayId);
         dayData = response.body.day;
-        (dayData as IDay).daySummary = response.body.daySummary;
+        dayData.daySummary = response.body.daySummary;
       });
 
       it("Should return a 201 status code", () => {
@@ -244,27 +244,27 @@ describe("Day router test suite", () => {
             kcalConsumed: 628,
             dailyRate: 1614,
             percentsOfDailyRate: 38.909541511772,
-            id: (daySummary as IDaySummary)._id.toString(),
-            userId: (createdUser as IMom)._id.toString(),
+            id: daySummary._id.toString(),
+            userId: createdUser._id.toString(),
           },
         });
       });
 
       it("Should update existing day summary in DB", () => {
-        expect((daySummary as IDaySummary).toObject() as IDaySummary).toEqual({
+        expect(daySummary.toObject()).toEqual({
           date: validReqBody.date,
           kcalLeft: 986,
           kcalConsumed: 628,
           dailyRate: 1614,
           percentsOfDailyRate: 38.909541511772,
-          _id: (daySummary as IDaySummary)._id,
-          userId: (createdUser as IMom)._id,
+          _id: daySummary._id,
+          userId: createdUser._id,
           __v: 0,
         });
       });
 
       it("Should update existing day DB", () => {
-        expect((day as IDay).eatenProducts.length).toBe(2);
+        expect(day.eatenProducts.length).toBe(2);
       });
 
       it("Should create an id for 'eatenProduct'", () => {
@@ -290,8 +290,8 @@ describe("Day router test suite", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post("/day")
-          .send(validReqBody)
-          .set("Authorization", `Bearer qwerty123`);
+          .set("Authorization", `Bearer qwerty123`)
+          .send(validReqBody);
       });
 
       it("Should return a 401 status code", () => {
@@ -360,7 +360,7 @@ describe("Day router test suite", () => {
   });
 
   describe("POST /day/info", () => {
-    let response: Response;
+    let response;
 
     const validReqBody = {
       date: "2020-12-31",
@@ -406,7 +406,12 @@ describe("Day router test suite", () => {
     });
 
     context("With secondValidReqBody", () => {
-      const dailyRate = 10 * 90 + 6.25 * 180 - 5 * 30 - 161 - 10 * (90 - 80);
+      const dailyRate =
+        10 * 90 +
+        6.25 * 180 -
+        5 * 30 -
+        161 -
+        10 * (90 - 80);
 
       beforeAll(async () => {
         response = await supertest(app)
@@ -481,9 +486,9 @@ describe("Day router test suite", () => {
   });
 
   describe("DELETE /day", () => {
-    let response: Response;
-    let newDaySummary: IDaySummary | null;
-    let newDay: IDay | IDayPopulated | null;
+    let response;
+    let newDaySummary;
+    let newDay;
 
     const validReqBody = {
       dayId,
@@ -508,7 +513,7 @@ describe("Day router test suite", () => {
         validReqBody.dayId = dayId;
         validReqBody.eatenProductId = eatenProductId;
         await supertest(app)
-          .post(`/daily-rate/${(secondCreatedUser as IMom)._id}`)
+          .post(`/daily-rate/${secondCreatedUser._id}`)
           .set("Authorization", `Bearer ${secondAccessToken}`)
           .send({
             weight: 90,
@@ -563,15 +568,15 @@ describe("Day router test suite", () => {
             kcalConsumed: 314,
             dailyRate: 1614,
             percentsOfDailyRate: 19.454770755886,
-            id: (newDaySummary as IDaySummary)._id.toString(),
-            userId: (createdUser as IMom)._id.toString(),
+            id: newDaySummary._id.toString(),
+            userId: createdUser._id.toString(),
           },
         });
       });
 
       it("Should delete a product from DB", () => {
         expect(
-          (newDay as IDay).eatenProducts.find(
+          newDay.eatenProducts.find(
             (product) => product.id === validReqBody.eatenProductId
           )
         ).toBeFalsy();

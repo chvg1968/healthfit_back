@@ -1,23 +1,17 @@
-import mongoose from "mongoose";
-import supertest, { Response } from "supertest";
-import { Application } from "express";
-import jwt from "jsonwebtoken";
-import {
-  IMom,
-  IMomPopulated,
-  ISession,
-} from "../helpers/typescript-helpers/interfaces";
-import Server from "../server/server";
-import UserModel from "../REST-entities/user/user.model";
-import SessionModel from "../REST-entities/session/session.model";
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+const jwt = require("jsonwebtoken");
+const Server = require("../server/server");
+const UserModel = require("../REST-entities/user/user.model");
+const SessionModel = require("../REST-entities/session/session.model");
 
 describe("Auth router test suite", () => {
-  let app: Application;
-  let accessToken: string;
-  let refreshToken: string;
-  let sid: string;
-  let createdUser: IMom | IMomPopulated | null;
-  let createdSession: ISession | null;
+  let app;
+  let accessToken;
+  let refreshToken;
+  let sid;
+  let createdUser;
+  let createdSession;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -36,7 +30,7 @@ describe("Auth router test suite", () => {
   });
 
   describe("POST /auth/register", () => {
-    let response: Response;
+    let response;
 
     const validReqBody = {
       username: "Test",
@@ -69,7 +63,7 @@ describe("Auth router test suite", () => {
         expect(response.body).toEqual({
           email: validReqBody.email,
           username: validReqBody.username,
-          id: (createdUser as IMom)._id.toString(),
+          id: createdUser._id.toString(),
         });
       });
 
@@ -91,7 +85,7 @@ describe("Auth router test suite", () => {
 
       it("Should say if email is already in use", () => {
         expect(response.body.message).toBe(
-          `User with ${(createdUser as IMom).email} email already exists`
+          `User with ${createdUser.email} email already exists`
         );
       });
     });
@@ -114,7 +108,7 @@ describe("Auth router test suite", () => {
   });
 
   describe("POST /auth/login", () => {
-    let response: Response;
+    let response;
 
     const validReqBody = {
       email: "test@email.com",
@@ -145,7 +139,7 @@ describe("Auth router test suite", () => {
         createdSession = await SessionModel.findById(response.body.sid);
         accessToken = response.body.accessToken;
         refreshToken = response.body.refreshToken;
-        sid = (createdSession as ISession)._id.toString();
+        sid = createdSession._id.toString();
       });
 
       it("Should return a 200 status code", () => {
@@ -161,8 +155,8 @@ describe("Auth router test suite", () => {
           user: {
             email: validReqBody.email,
             username: "Test",
-            userData: (createdUser as IMom).userData,
-            id: (createdUser as IMom)._id.toString(),
+            userData: createdUser.userData,
+            id: createdUser._id.toString(),
           },
         });
       });
@@ -171,7 +165,7 @@ describe("Auth router test suite", () => {
         expect(
           jwt.verify(
             response.body.accessToken,
-            process.env.JWT_ACCESS_SECRET as string
+            process.env.JWT_ACCESS_SECRET
           )
         ).toBeTruthy();
       });
@@ -180,7 +174,7 @@ describe("Auth router test suite", () => {
         expect(
           jwt.verify(
             response.body.refreshToken,
-            process.env.JWT_REFRESH_SECRET as string
+            process.env.JWT_REFRESH_SECRET
           )
         ).toBeTruthy();
       });
@@ -242,8 +236,8 @@ describe("Auth router test suite", () => {
   });
 
   describe("POST /auth/refresh", () => {
-    let response: Response;
-    let newSession: ISession | null;
+    let response;
+    let newSession;
 
     const validReqBody = {
       sid,
@@ -364,7 +358,7 @@ describe("Auth router test suite", () => {
         expect(response.body).toEqual({
           newAccessToken: response.body.newAccessToken,
           newRefreshToken: response.body.newRefreshToken,
-          sid: (newSession as ISession)._id.toString(),
+          sid: newSession._id.toString(),
         });
       });
 
@@ -372,7 +366,7 @@ describe("Auth router test suite", () => {
         expect(
           jwt.verify(
             response.body.newAccessToken,
-            process.env.JWT_ACCESS_SECRET as string
+            process.env.JWT_ACCESS_SECRET
           )
         ).toBeTruthy();
       });
@@ -381,7 +375,7 @@ describe("Auth router test suite", () => {
         expect(
           jwt.verify(
             response.body.newRefreshToken,
-            process.env.JWT_REFRESH_SECRET as string
+            process.env.JWT_REFRESH_SECRET
           )
         ).toBeTruthy();
       });
@@ -397,7 +391,7 @@ describe("Auth router test suite", () => {
   });
 
   describe("POST /auth/logout", () => {
-    let response: Response;
+    let response;
 
     it("Init endpoint testing", () => {
       expect(true).toBe(true);

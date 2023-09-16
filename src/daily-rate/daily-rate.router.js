@@ -1,11 +1,11 @@
-import { Router } from "express";
-import Joi from "joi";
-import mongoose from "mongoose";
-import validate from "../helpers/function-helpers/validate";
-import { authorize } from "../auth/auth.controller";
-import tryCatchWrapper from "../helpers/function-helpers/try-catch-wrapper";
-import { countDailyRate } from "./daily-rate.controller";
-import { BloodType } from "../helpers/typescript-helpers/enums";
+const { Router } = require("express");
+const Joi = require("joi");
+const mongoose = require("mongoose");
+const { BloodType } = require("../helpers/typescript-helpers/enums");
+const validate = require("../helpers/function-helpers/validate");
+const { authorize } = require("../auth/auth.controller");
+const tryCatchWrapper = require("../helpers/function-helpers/try-catch-wrapper");
+const { countDailyRate } = require("./daily-rate.controller");
 
 const getDailyRateSchema = Joi.object({
   weight: Joi.number().required().min(20).max(500),
@@ -14,7 +14,12 @@ const getDailyRateSchema = Joi.object({
   desiredWeight: Joi.number().required().min(20).max(500),
   bloodType: Joi.number()
     .required()
-    .valid(BloodType.ONE, BloodType.TWO, BloodType.THREE, BloodType.FOUR),
+    .valid(
+      BloodType.ONE,
+      BloodType.TWO,
+      BloodType.THREE,
+      BloodType.FOUR
+    ),
 });
 
 const userIdSchema = Joi.object({
@@ -42,4 +47,4 @@ router.post(
   tryCatchWrapper(countDailyRate)
 );
 
-export default router;
+module.exports = router;

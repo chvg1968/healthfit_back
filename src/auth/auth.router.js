@@ -1,15 +1,15 @@
-import { Router } from "express";
-import mongoose from "mongoose";
-import Joi from "joi";
-import tryCatchWrapper from "../helpers/function-helpers/try-catch-wrapper";
-import validate from "../helpers/function-helpers/validate";
-import {
+const { Router } = require("express");
+const mongoose = require("mongoose");
+const Joi = require("joi");
+const tryCatchWrapper = require("../helpers/function-helpers/try-catch-wrapper");
+const validate = require("../helpers/function-helpers/validate");
+const {
   register,
   login,
   authorize,
   refreshTokens,
   logout,
-} from "./auth.controller";
+} = require("./auth.controller");
 
 const signUpSchema = Joi.object({
   username: Joi.string().min(3).max(254).required(),
@@ -47,4 +47,4 @@ router.post(
 );
 router.post("/logout", tryCatchWrapper(authorize), tryCatchWrapper(logout));
 
-export default router;
+module.exports = router;

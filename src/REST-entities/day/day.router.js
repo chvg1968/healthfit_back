@@ -1,15 +1,15 @@
-import { Router } from "express";
-import mongoose from "mongoose";
-import Joi from "joi";
-import { authorize } from "../../auth/auth.controller";
-import tryCatchWrapper from "../../helpers/function-helpers/try-catch-wrapper";
-import validate from "../../helpers/function-helpers/validate";
-import {
+const express = require("express");
+const mongoose = require("mongoose");
+const Joi = require("joi");
+const { authorize } = require("../../auth/auth.controller");
+const tryCatchWrapper = require("../../helpers/function-helpers/try-catch-wrapper");
+const validate = require("../../helpers/function-helpers/validate");
+const {
   addProduct,
   deleteProduct,
   checkDailyRate,
   getDayInfo,
-} from "./day.controller";
+} = require("./day.controller");
 
 const addProductSchema = Joi.object({
   date: Joi.string()
@@ -35,7 +35,7 @@ const addProductSchema = Joi.object({
       return value;
     })
     .required(),
-  weight: Joi.number().min(1).max(3000).required()
+  weight: Joi.number().min(1).max(3000).required(),
 });
 
 const deleteProductSchema = Joi.object({
@@ -68,7 +68,7 @@ const getDayInfoScheme = Joi.object({
     .required(),
 });
 
-const router = Router();
+const router = express.Router();
 
 router.post(
   "/",
@@ -92,4 +92,4 @@ router.delete(
   tryCatchWrapper(deleteProduct)
 );
 
-export default router;
+module.exports = router;

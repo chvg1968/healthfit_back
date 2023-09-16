@@ -1,10 +1,10 @@
-import { Router } from "express";
-import Joi from "joi";
-import tryCatchWrapper from "../helpers/function-helpers/try-catch-wrapper";
-import validate from "../helpers/function-helpers/validate";
-import { authorize } from "../auth/auth.controller";
-import { checkDailyRate } from "../REST-entities/day/day.controller";
-import { findProducts } from "./product-search.controller";
+const { Router } = require("express");
+const Joi = require("joi");
+const tryCatchWrapper = require("../helpers/function-helpers/try-catch-wrapper");
+const validate = require("../helpers/function-helpers/validate");
+const { authorize } = require("../auth/auth.controller");
+const { checkDailyRate } = require("../REST-entities/day/day.controller");
+const { findProducts } = require("./product-search.controller");
 
 const searchQuerySchema = Joi.object({
   search: Joi.string().min(1).max(30).required(),
@@ -20,4 +20,4 @@ router.get(
   tryCatchWrapper(findProducts)
 );
 
-export default router;
+module.exports = router;

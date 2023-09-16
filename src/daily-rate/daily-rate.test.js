@@ -1,22 +1,16 @@
-import mongoose from "mongoose";
-import supertest, { Response } from "supertest";
-import { Application } from "express";
-import {
-  IMom,
-  IMomPopulated,
-  IProduct,
-} from "../helpers/typescript-helpers/interfaces";
-import Server from "../server/server";
-import UserModel from "../REST-entities/user/user.model";
-import SessionModel from "../REST-entities/session/session.model";
-import { BloodType } from "../helpers/typescript-helpers/enums";
+const mongoose = require("mongoose");
+const supertest = require("supertest");
+const { BloodType } = require("../helpers/typescript-helpers/enums");
+const Server = require("../server/server");
+const UserModel = require("../REST-entities/user/user.model");
+const SessionModel = require("../REST-entities/session/session.model");
 
 describe("Daily-rate router test suite", () => {
-  let app: Application;
-  let response: Response;
-  let secondResponse: Response;
-  let accessToken: string;
-  let createdUser: IMom | IMomPopulated | null;
+  let app;
+  let response;
+  let secondResponse;
+  let accessToken;
+  let createdUser;
 
   beforeAll(async () => {
     app = new Server().startForTesting();
@@ -46,7 +40,7 @@ describe("Daily-rate router test suite", () => {
   });
 
   describe("POST /daily-rate", () => {
-    let response: Response;
+    let response;
 
     const validReqBody = {
       weight: 90,
@@ -73,7 +67,7 @@ describe("Daily-rate router test suite", () => {
       bloodType: BloodType.TWO,
     };
 
-    context("With validReqBody", () => {
+    describe("With validReqBody", () => {
       beforeAll(async () => {
         response = await supertest(app).post("/daily-rate").send(validReqBody);
       });
@@ -96,14 +90,14 @@ describe("Daily-rate router test suite", () => {
       it("Should return a right list of not allowed products", () => {
         expect(
           response.body.notAllowedProducts.find(
-            (product: IProduct) =>
+            (product) =>
               product.groupBloodNotAllowed[validReqBody.bloodType] === true
           )
         ).toBeFalsy();
       });
     });
 
-    context("With invalidReqBody (no 'bloodType' provided)", () => {
+    describe("With invalidReqBody (no 'bloodType' provided)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post("/daily-rate")
@@ -119,7 +113,7 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("With secondInvalidReqBody ('weight' is less than 0)", () => {
+    describe("With secondInvalidReqBody ('weight' is less than 0)", () => {
       beforeAll(async () => {
         response = await supertest(app)
           .post("/daily-rate")
@@ -139,7 +133,7 @@ describe("Daily-rate router test suite", () => {
   });
 
   describe("POST /daily-rate/:userId", () => {
-    let response: Response;
+    let response;
 
     const validReqBody = {
       weight: 90,
@@ -166,10 +160,10 @@ describe("Daily-rate router test suite", () => {
       bloodType: BloodType.TWO,
     };
 
-    context("With validReqBody", () => {
+    describe("With validReqBody", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(validReqBody);
       });
@@ -182,7 +176,7 @@ describe("Daily-rate router test suite", () => {
         expect(response.body).toEqual({
           dailyRate,
           summaries: [],
-          id: (createdUser as IMom)._id.toString(),
+          id: createdUser._id.toString(),
           notAllowedProducts: response.body.notAllowedProducts,
         });
       });
@@ -192,10 +186,10 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("With invalidReqBody ('bloodType' not provided)", () => {
+    describe("With invalidReqBody ('bloodType' not provided)", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(invalidReqBody);
       });
@@ -209,10 +203,10 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("With secondInvalidReqBody ('weight' is less than 0)", () => {
+    describe("With secondInvalidReqBody ('weight' is less than 0)", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .set("Authorization", `Bearer ${accessToken}`)
           .send(secondInvalidReqBody);
       });
@@ -228,10 +222,10 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("Without providing 'accessToken'", () => {
+    describe("Without providing 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .send(secondInvalidReqBody);
       });
 
@@ -244,10 +238,10 @@ describe("Daily-rate router test suite", () => {
       });
     });
 
-    context("Without invalid 'accessToken'", () => {
+    describe("With invalid 'accessToken'", () => {
       beforeAll(async () => {
         response = await supertest(app)
-          .post(`/daily-rate/${(createdUser as IMom)._id}`)
+          .post(`/daily-rate/${createdUser._id}`)
           .set("Authorization", `Bearer qwerty123`)
           .send(secondInvalidReqBody);
       });

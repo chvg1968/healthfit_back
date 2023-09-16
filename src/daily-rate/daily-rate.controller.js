@@ -1,16 +1,15 @@
-import { Request, Response } from "express";
-import ProductModel from "../REST-entities/product/product.model";
-import { IMom, IDaySummary } from "../helpers/typescript-helpers/interfaces";
-import { IProduct } from "../helpers/typescript-helpers/interfaces";
-import UserModel from "../REST-entities/user/user.model";
-import SummaryModel from "../REST-entities/summary/summary.model";
+const { Request, Response } = require("express");
+const ProductModel = require("../REST-entities/product/product.model");
+const UserModel = require("../REST-entities/user/user.model");
+const SummaryModel = require("../REST-entities/summary/summary.model");
 
-export const countDailyRate = async (req: Request, res: Response) => {
+const countDailyRate = async (req, res) => {
   const { height, weight, age, desiredWeight, bloodType } = req.body;
   const { userId } = req.params;
   const dailyRate =
     10 * weight + 6.25 * height - 5 * age - 161 - 10 * (weight - desiredWeight);
-  let notAllowedProductsObj: IProduct[] = [];
+  let notAllowedProductsObj = [];
+  
   switch (bloodType) {
     case 1:
       notAllowedProductsObj = await ProductModel.find({
@@ -35,15 +34,18 @@ export const countDailyRate = async (req: Request, res: Response) => {
     default:
       break;
   }
+  
   const notAllowedProducts = [
     ...new Set(notAllowedProductsObj.map((product) => product.title.ru)),
   ];
+  
   if (userId) {
     const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).send({ message: "Invalid user" });
     }
-    (user as IMom).userData = {
+    
+    user.userData = {
       weight,
       height,
       age,
@@ -52,8 +54,11 @@ export const countDailyRate = async (req: Request, res: Response) => {
       dailyRate,
       notAllowedProducts,
     };
-    await (user as IMom).save();
+    
+    await user.save();
+    
     let summariesToUpdate = await SummaryModel.find({ userId });
+    
     if (summariesToUpdate) {
       summariesToUpdate.forEach((summary) => {
         if (summary.dailyRate > dailyRate) {
@@ -75,6 +80,7 @@ export const countDailyRate = async (req: Request, res: Response) => {
     } else {
       summariesToUpdate = [];
     }
+    
     return res.status(201).send({
       dailyRate,
       summaries: summariesToUpdate,
@@ -82,5 +88,8 @@ export const countDailyRate = async (req: Request, res: Response) => {
       notAllowedProducts,
     });
   }
+  
   return res.status(200).send({ dailyRate, notAllowedProducts });
 };
+
+module.exports = countDailyRate;
