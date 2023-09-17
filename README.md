@@ -1,3 +1,3 @@
-Front-End repository: https://github.com/tipanazar/Slim-Mom</br>
+   PROYECTO FINAL GOIT
 
-Backend documentation: https://app.swaggerhub.com/apis-docs/tipanazar/Slim-Mom/1#/
+   BACKEND DE APLICACIÓN DE MEDIDA DE CALORÍAS Y CONTROL DE CONSUMO DE ALIMENTOS 
