@@ -1,10 +1,12 @@
-const createError = require("./createError");
-const { sendEmail, msg } = require("./sendEmail");
-const calculateCalories = require("./calculateCalories");
+const dailyCalorieIntake = require("./dailyCalorieIntake");
+const notRecommendedProducts = require("./notRecommendedProducts");
+const imageResize = require("./imageResize");
+const { generateAccessToken, generateRefreshToken } = require("./authHelper");
 
 module.exports = {
-  createError,
-  sendEmail,
-  msg,
-  calculateCalories,
+  dailyCalorieIntake,
+  notRecommendedProducts,
+  generateAccessToken,
+  generateRefreshToken,
+  imageResize,
 };

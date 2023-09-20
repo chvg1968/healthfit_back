@@ -1,82 +1,116 @@
 const { Schema, model } = require("mongoose");
 const Joi = require("joi");
-
-const emailRegexp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-const nameRegexp = /^[а-яА-ЯёЁєЄґҐїЇіІ' a-zA-Z]+$/;
+const bcrypt = require("bcryptjs");
+const path = require("path");
+const avatars = require("../public/defaultAvatars/avatars");
 
 const userSchema = Schema(
   {
-    name: {
+    password: {
       type: String,
-      required: [true, "Name is required"],
-      match: nameRegexp,
-      minLength: 2,
-      maxLength: 16,
+      required: [true, "Password is required"],
     },
     email: {
       type: String,
       required: [true, "Email is required"],
-      match: emailRegexp,
       unique: true,
-      dropDups: true,
     },
-    password: {
+    name: {
       type: String,
-      required: [true, "Password is required"],
-      minLength: 6,
+      required: [true, "Name is required"],
     },
-    token: {
-      type: String,
+    tokens: {
+      accessToken: {
+        type: String,
+      },
+      refreshToken: {
+        type: String,
+      },
+      type: Object,
       default: null,
     },
-    parameters: {
+    userInfo: {
       type: Object,
-      default: {
-        age: "0",
-        height: "0",
-        currentWeight: "0",
-        desiredWeight: "0",
-        bloodType: "1",
-        calories: "0",
-      },
+      default: null,
     },
-    notAllowedProducts: {
+    userDailyCalorieIntake: {
+      type: Number,
+      default: "",
+    },
+    userNotRecommendedProducts: {
       type: Array,
       default: [],
     },
-    verify: {
-      type: Boolean,
-      default: false,
-    },
-    verificationToken: {
+    avatarURL: {
       type: String,
-      required: [true, "Verification token is required"],
+      default: () => {
+        const avatarURL = path.join(
+          "defaultAvatars",
+          avatars[Math.floor(Math.random() * avatars.length)]
+        );
+        return avatarURL;
+      },
+      required: true,
     },
   },
-  { versionKey: false, timestamps: false }
+  { versionKey: false, timestamps: true }
 );
 
-const addUserSchema = Joi.object({
-  email: Joi.string().pattern(emailRegexp).required(),
-  name: Joi.string().pattern(nameRegexp).min(2).max(16).required(),
-  password: Joi.string().min(6).max(20).required(),
-});
-
-const loginUserSchema = Joi.object({
-  email: Joi.string().pattern(emailRegexp).required(),
-  password: Joi.string().min(6).required(),
-});
-
-const emailValidationSchema = Joi.object({
-  email: Joi.string().pattern(emailRegexp).required(),
-});
-
-const schemas = {
-  addUser: addUserSchema,
-  loginUser: loginUserSchema,
-  emailValidation: emailValidationSchema,
+userSchema.methods.setPassword = function (password) {
+  this.password = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 };
+
+userSchema.methods.comparePassword = function (password) {
+  return bcrypt.compareSync(password, this.password);
+};
+
+const joiUserInfoSchema = Joi.object({
+  userData: Joi.object({
+    height: Joi.string().required(),
+    age: Joi.string().required(),
+    currentWeight: Joi.string().required(),
+    desiredWeight: Joi.string().required(),
+    bloodType: Joi.string().required(),
+  }),
+});
+
+const joiRegisterSchema = Joi.object({
+  password: Joi.string()
+    .min(8)
+    .max(100)
+    .regex(/(?=.*[0-9])(?=.*[a-z])[0-9a-zA-Z]{8,}/)
+    .required(),
+  email: Joi.string()
+    .min(3)
+    .max(254)
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "ua"] },
+    })
+    .required(),
+  name: Joi.string().min(3).max(254).required(),
+});
+
+const joiLoginSchema = Joi.object({
+  password: Joi.string().required(),
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "ua"] },
+    })
+    .required(),
+});
+
+const joiRefreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required(),
+});
 
 const User = model("user", userSchema);
 
-module.exports = { User, schemas };
+module.exports = {
+  User,
+  joiRefreshTokenSchema,
+  joiUserInfoSchema,
+  joiRegisterSchema,
+  joiLoginSchema,
+};
