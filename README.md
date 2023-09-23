@@ -1,1 +1,1 @@
-[Swagger](https://slim-mom-backend-ylpc.onrender.com/api-docs/)
+Swagger: http://localhost:9000/api-docs
