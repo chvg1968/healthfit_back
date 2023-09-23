@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://slim-mom-backend-ylpc.onrender.com/api/v1"
+      "url": "http://localhost:9000/api/v1"
     }
   ],
   "apis": ["routes/api/*.js"],
@@ -543,7 +543,7 @@
             "items": {
               "type": "string"
             },
-            "example": ["мучные", "молчные", "мясо"]
+            "example": ["Harina", "lácteos", "Carne"]
           },
           "password": {
             "type": "string",
@@ -563,8 +563,7 @@
               "type": "string"
             },
             "example": {
-              "ru": "Яйцо куриное (желток сухой)",
-              "ua": "Яйце куряче (жовток сухий)"
+              "es": "Huevo de gallina(yema seca)"
             }
           },
           "calories": {
