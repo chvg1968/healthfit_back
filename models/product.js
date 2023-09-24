@@ -3,18 +3,14 @@ const { Schema, model } = require("mongoose");
 const schemaProduct = Schema(
   {
     categories: {
-      ru: String,
-      ua: String,
-      en: String,
+      es: String,
     },
     weight: {
       type: Number,
       default: 100,
     },
     title: {
-      ru: String,
-      ua: String,
-      en: String,
+      es: String,
     },
     calories: {
       type: Number,

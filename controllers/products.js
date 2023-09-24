@@ -3,6 +3,8 @@ const { productService } = require("../services");
 const getAllProducts = async (req, res, next) => {
   const products = await productService.listProducts();
 
+  console.log(p);
+
   res.status(200).json({
     status: "OK",
     code: 200,
@@ -20,10 +22,10 @@ const getProductsForQuery = async (req, res, next) => {
   const arrayFoundProducts = [];
 
   products.filter((prod) => {
-    const itemProduct = prod.title.ua.toLowerCase().trim();
+    const itemProduct = prod.title.toString().toLowerCase().trim();
     if (itemProduct.includes(query.toLowerCase().trim())) {
       return arrayFoundProducts.push({
-        title: prod.title.ua,
+        title: prod.title,
         _id: prod._id,
       });
     }
