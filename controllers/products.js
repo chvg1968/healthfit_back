@@ -3,7 +3,7 @@ const { productService } = require("../services");
 const getAllProducts = async (req, res, next) => {
   const products = await productService.listProducts();
 
-  console.log(p);
+  
 
   res.status(200).json({
     status: "OK",
