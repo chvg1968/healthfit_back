@@ -9,7 +9,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./api-doc.json");
 
 app.use(cors({
-  origin: "http://localhost:3000", // Reemplaza con la URL correcta del frontend
+  origin: "https://healthfitfront.netlify.app/", // Reemplaza con la URL correcta del frontend
   credentials: true, // Si es necesario
 }));
 
