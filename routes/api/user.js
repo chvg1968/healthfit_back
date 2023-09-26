@@ -24,4 +24,5 @@ router.patch(
   ctrlWrapper(upload.single("avatar")),
   ctrlWrapper(userCtrl.updateAvatar)
 );
+
 module.exports = router;
