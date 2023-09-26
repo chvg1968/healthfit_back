@@ -1,7 +1,7 @@
 const express = require("express");
 
 const { ctrlWrapper, validation, auth, upload } = require("../../middlewares");
-const { joiUserInfoSchema } = require("../../models/user");
+const { joiUserInfoSchema } = require("../../models/User");
 
 const { userCtrl } = require("../../controllers");
 
