@@ -8,10 +8,21 @@ const app = express();
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./api-doc.json");
 
-app.use(cors({
-  origin: "http://localhost:3000", // Reemplaza con la URL correcta del frontend
-  credentials: true, // Si es necesario
-}));
+// Configuración de CORS para permitir localhost:3000 y la URL de Netlify
+const allowedOrigins = ["http://localhost:3000", "https://healthfitfront.netlify.app"];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Si es necesario, dependiendo de tus requerimientos de autenticación
+  })
+);
 
 const {
   userRouter,
@@ -20,9 +31,9 @@ const {
   authRouter,
 } = require("./routes/api");
 
-const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+const formatsLogger =
+ app.get("env") === "development" ? "dev" : "short";
 
-app.use(cors());
 app.use(express.json());
 app.use(logger(formatsLogger));
 app.use(express.static("public"));
@@ -33,7 +44,7 @@ app.use("/api/v1/products", productsRouter);
 app.use("/api/v1/dietaries", dietariesRouter);
 
 app.use((_, res, next) => {
-  next({ status: 404, message: "Not found" });
+ next({ status: 404, message: "Not found" });
 });
 
 app.use(errorHandler);
