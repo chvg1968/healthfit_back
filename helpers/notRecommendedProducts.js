@@ -18,9 +18,9 @@ const notRecommendedProducts = (products, bloodType) => {
     .filter((product) => product.groupBloodNotAllowed[bloodType] === true)
     .map((product) => product.title);
 
-  const unique = filterUnique(notRecommendedProducts);
+  // const unique = filterUnique(notRecommendedProducts);
 
-  return unique;
+  return notRecommendedProducts;
 };
 
 module.exports = notRecommendedProducts;
