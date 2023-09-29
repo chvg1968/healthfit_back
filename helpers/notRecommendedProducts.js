@@ -14,11 +14,11 @@ function filterUnique(array) {
 }
 
 const notRecommendedProducts = (products, bloodType) => {
-  const notRecommendedCategories = products
+  const notRecommendedProducts = products
     .filter((product) => product.groupBloodNotAllowed[bloodType] === true)
-    .map((product) => product.categories);
+    .map((product) => product.title);
 
-  const unique = filterUnique(notRecommendedCategories);
+  const unique = filterUnique(notRecommendedProducts);
 
   return unique;
 };
