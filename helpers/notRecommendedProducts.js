@@ -3,7 +3,7 @@ const notRecommendedProducts = (products, bloodType) => {
     .filter((product) => product.groupBloodNotAllowed[bloodType] === true)
     .map((product) => product.title);
 
-  return filteredProducts.slice(0, 4);;
+  return filteredProducts.slice(0, 4);
 };
 
 module.exports = notRecommendedProducts;
