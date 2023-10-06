@@ -10,4 +10,6 @@ router.get("/", ctrlWrapper(getAllProducts));
 
 router.get("/search", ctrlWrapper(getProductsForQuery));
 
+
+
 module.exports = router;
