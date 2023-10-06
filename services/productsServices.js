@@ -15,7 +15,7 @@ const listProducts = async (lang = 'es') => {
     // Realiza una consulta en la colección
     const products = await collection.find({}).toArray();
     console.log(`Contenido de la colección "${collectionName}":`);
-    console.log(products);
+    
 
     return products;
   } catch (error) {
