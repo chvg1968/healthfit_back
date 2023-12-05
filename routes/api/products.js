@@ -1,15 +1,18 @@
-const express = require("express");
+const Router  = require("express");
 const { ctrlWrapper } = require("../../middlewares");
 const {
   productsCtrl: { getAllProducts, getProductsForQuery },
 } = require("../../controllers");
 
-const router = express.Router();
 
-router.get("/", ctrlWrapper(getAllProducts));
+
+const router = Router();
+
+router.get("/:lang",  ctrlWrapper(getAllProducts));
 
 router.get("/search", ctrlWrapper(getProductsForQuery));
 
 
 
 module.exports = router;
+

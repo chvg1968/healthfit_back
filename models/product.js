@@ -11,6 +11,7 @@ const schemaProduct = Schema(
     },
     title: {
       es: String,
+      en: String
     },
     calories: {
       type: Number,

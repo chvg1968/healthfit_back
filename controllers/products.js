@@ -1,14 +1,11 @@
 const { productService } = require("../services");
 
-
 const getAllProducts = async (req, res, next) => {
+  const lang = req.params.lang || 'en'; // Valor predeterminado si no se proporciona
   try {
-    const lang = req.query.lang || 'es'; // Establece 'es' como idioma predeterminado si no se proporciona uno
-
-    // Utiliza el servicio para obtener los productos según el idioma
+    // Lógica para obtener productos en el idioma especificado
     const products = await productService.listProducts(lang);
-
-    res.status(200).json({
+    return res.status(200).json({
       status: 'OK',
       code: 200,
       data: {
@@ -17,10 +14,17 @@ const getAllProducts = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Error al obtener productos:', error);
-    res.status(500).json({ message: 'Error al obtener productos' });
+    console.error('Error on controller to get products', error);
+    return res.status(500).json({
+      status: 'Error',
+      code: 500,
+      message: 'Error to get products',
+    });
   }
 };
+
+
+
 
 const getProductsForQuery = async (req, res, next) => {
   const { query = "" } = req.query;
@@ -29,7 +33,7 @@ const getProductsForQuery = async (req, res, next) => {
   const arrayFoundProducts = [];
 
   products.filter((prod) => {
-    const itemProduct = prod.title.toString().toLowerCase().trim();
+    const itemProduct = prod.title.toLowerCase().trim();
     if (itemProduct.includes(query.toLowerCase().trim())) {
       return arrayFoundProducts.push({
         title: prod.title,
@@ -49,4 +53,8 @@ const getProductsForQuery = async (req, res, next) => {
   });
 };
 
-module.exports = { getAllProducts, getProductsForQuery };
+
+
+
+
+module.exports = { getAllProducts, getProductsForQuery};

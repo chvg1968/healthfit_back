@@ -1,4 +1,11 @@
 {
     "editor.tabCompletion": "on",
-    "diffEditor.codeLens": true
+    "diffEditor.codeLens": true,
+    "markdown.preview.fontSize": 24,
+    "markdown.preview.lineHeight": 5,
+    "editor.fontSize": 12,
+    "editor.tabSize": 4,
+    "editor.accessibilityPageSize": 4,
+    "window.density.editorTabHeight": "default",
+    "window.zoomLevel": 1
 }
