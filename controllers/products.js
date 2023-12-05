@@ -1,22 +1,26 @@
 const { productService } = require("../services");
-
 const getAllProducts = async (req, res, next) => {
   try {
-    const lang = req.query.lang || 'es'; // Set 'es' as the default language if none is provided
+    const lang = req.params.lang || 'es';
 
     const products = await productService.listProducts(lang);
-    console.log(products);
+
+    const result = products.map(({ _id, title, categories, weight, calories, groupBloodNotAllowed }) => ({
+      _id,
+      title,
+      categories,
+      weight,
+      calories,
+      groupBloodNotAllowed,
+      // Agrega otros campos según sea necesario
+    }));
 
     res.status(200).json({
       status: 'OK',
       code: 200,
       data: {
         resultItems: products.length,
-        result: products.map((product) => ({
-          _id: product._id,
-          title: product.title[lang], // Access the title in the specified language
-          // Include other fields as needed
-        })),
+        result,
       },
     });
   } catch (error) {

@@ -6,7 +6,7 @@ const {
 
 const router = express.Router();
 
-router.get("/", ctrlWrapper(getAllProducts));
+router.get("/:lang", ctrlWrapper(getAllProducts));
 
 router.get("/search", ctrlWrapper(getProductsForQuery));
 
