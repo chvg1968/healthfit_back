@@ -13,3 +13,4 @@ router.get("/search", ctrlWrapper(getProductsForQuery));
 
 
 module.exports = router;
+

@@ -1,7 +1,8 @@
 const { productService } = require("../services");
 const getAllProducts = async (req, res, next) => {
+  const lang = req.params.lang || 'en'; // Valor predeterminado si no se proporciona
   try {
-    const lang = req.params.lang || 'es';
+    
 
     const products = await productService.listProducts(lang);
 
@@ -24,8 +25,12 @@ const getAllProducts = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Error al obtener productos:', error);
-    res.status(500).json({ message: 'Error al obtener productos' });
+    console.error('Error on controller to get products', error);
+    return res.status(500).json({
+      status: 'Error',
+      code: 500,
+      message: 'Error to get products',
+    });
   }
 };
 

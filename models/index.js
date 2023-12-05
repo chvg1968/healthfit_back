@@ -5,7 +5,7 @@ const {
   joiRegisterSchema,
   joiLoginSchema,
   joiRefreshTokenSchema,
-} = require("./User");
+} = require("./user");
 const {
   Dietary,
   joiDietaryDateSchema,

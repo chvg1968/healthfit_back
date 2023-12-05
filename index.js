@@ -1,7 +1,8 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 const app = require("./app");
 const { PORT, DB_HOST } = require("./helpers/env");
-mongoose.set('strictQuery', true);
+mongoose.set("strictQuery", true);
+
 
 mongoose
   .connect(DB_HOST, { dbName: 'db-health' }) // Especifica la base de datos aquí
