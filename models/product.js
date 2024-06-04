@@ -10,8 +10,10 @@ const schemaProduct = Schema(
       default: 100,
     },
     title: {
+      type:{
       en:String,
-      es: String
+      es:String,
+      },
     },
     calories: {
       type: Number,
