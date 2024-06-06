@@ -5,12 +5,8 @@ const {
 } = require("../../controllers");
 
 const router = express.Router();
-
-router.get("/:lang", ctrlWrapper(getAllProducts));
+router.get("/language/:lang", ctrlWrapper(getAllProducts));
 
 router.get("/search", ctrlWrapper(getProductsForQuery));
 
-
-
 module.exports = router;
-

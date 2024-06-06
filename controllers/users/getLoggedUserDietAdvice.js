@@ -5,6 +5,7 @@ const { User } = require("../../models");
 
 const getLoggedUserDietAdvice = async (req, res) => {
   const { _id } = req.user;
+
   const { height, age, currentWeight, desiredWeight, bloodType } =
     req.body.userData;
   const userDailyCalorieIntake = dailyCalorieIntake(req.body.userData);
