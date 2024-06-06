@@ -3,18 +3,24 @@ const { dailyCalorieIntake } = require("../../helpers");
 const { notRecommendedProducts } = require("../../helpers");
 
 const getNotLoggedUserDietAdvice = async (req, res) => {
-  try {
-    console.log('Recibida solicitud a /users/nutrition-advice:', req.body.userData);
+  console.log(
+    "Recibida solicitud a /users/nutrition-advice:",
+    req.body.userData
+  );
 
-    // Obtener el valor de lang desde req.query (o req.params si es necesario)
-    const lang = req.query.lang || 'en';
+  // Obtener el valor de lang desde req.params
+  const lang = req.params.lang || "en";
 
-    const userDailyCalorieIntake = dailyCalorieIntake(req.body.userData);
-    const products = await listProducts(lang);  
+  const userDailyCalorieIntake = dailyCalorieIntake(req.body.userData);
+  const products = await listProducts(lang);
 
-    console.log("Estos son los productos filtrados por idioma:", products);
+  const userNotRecommendedProducts = notRecommendedProducts(
+    products,
+    req.body.userData.bloodType
+    // Pasar lang a notRecommendedProducts
+  );
 
-    const userNotRecommendedProducts = notRecommendedProducts(products, req.body.userData.bloodType);
+  console.log("userNotRecommendedProducts:", userNotRecommendedProducts);
 
     console.log('userNotRecommendedProducts:', userNotRecommendedProducts);
 

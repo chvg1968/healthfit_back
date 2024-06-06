@@ -3,7 +3,7 @@ const { Dietary } = require("../../models");
 const updateDietary = async (userId, payload) => {
   const { date, data } = payload;
   const { product: _id, weightGrm } = data;
-
+  console.log("updating dieraryproduct:", payload);
   let products = null;
 
   const dayInfo = await Dietary.findOne({
