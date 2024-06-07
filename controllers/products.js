@@ -68,35 +68,6 @@ const getProductsForQuery = async (req, res, next) => {
   }
 };
 
-//   try {
 
-//     const { query } = req.query;
-
-//     console.log("ALGO", query);
-//     const products = await productService.listProducts("es");
-
-//     const arrayFoundProducts = products
-//       .filter((prod) => {
-//         const itemProduct = prod.title[lang].toLowerCase().trim();
-//         return itemProduct.includes(query.toLowerCase().trim());
-//       })
-//       .map(({ _id, title }) => ({
-//         _id,
-//         title,
-//       }));
-
-//     res.status(200).json({
-//       status: "OK",
-//       code: 200,
-//       data: {
-//         resultItems: arrayFoundProducts.length,
-//         result: arrayFoundProducts,
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Error al obtener productos:", error);
-//     res.status(500).json({ message: "Error al obtener productos" });
-//   }
-// };
 
 module.exports = { getAllProducts, getProductsForQuery };
