@@ -43,6 +43,13 @@ app.use("/api/v1/users", authRouter, userRouter);
 app.use("/api/v1/products", productsRouter);
 app.use("/api/v1/dietaries", dietariesRouter);
 
+// Después de la configuración de CORS
+app.use((req, res, next) => {
+  console.log('Requested URL:', req.url);
+  next();
+});
+
+
 app.use((_, res, next) => {
  next({ status: 404, message: "Not found" });
 });
